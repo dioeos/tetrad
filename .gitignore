@@ -1,3 +1,11 @@
 .direnv
 .env
 result
+
+# SERVER
+apps/tetrad-server/target
+apps/tetrad-server/data/*.sqlite
+apps/tetrad-server/data/*.sqlite3
+apps/tetrad-server/data/*.db
+apps/tetrad-server/data/*.db-*
+apps/tetrad-server/data/*.sqlite3-*
