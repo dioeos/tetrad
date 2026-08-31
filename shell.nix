@@ -30,6 +30,9 @@ pkgs.mkShell {
 
     typescript
     typescript-language-server
+
+    sqlx-cli
+    sqlite
   ];
 
   RUST_SRC_PATH = "${pkgs.rustPlatform.rustLibSrc}";
