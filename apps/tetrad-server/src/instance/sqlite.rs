@@ -2,9 +2,11 @@ use async_trait::async_trait;
 use sqlx::{FromRow, SqlitePool};
 use uuid::Uuid;
 
-use crate::instance::{
+use crate::common::time;
+
+use super::{
     model::Instance,
-    repository::{InstanceRepository, RepositoryError},
+    repository::{InstanceRepository, RepositoryError}
 };
 
 #[derive(Debug, FromRow)]
@@ -70,7 +72,7 @@ impl InstanceRepository for SqliteInstanceRepository {
         )
         .bind(Uuid::now_v7().to_string())
         .bind(name)
-        .bind(now_ms())
+        .bind(time::now_ms())
         .execute(&mut *transaction)
         .await?;
 
@@ -91,11 +93,6 @@ impl InstanceRepository for SqliteInstanceRepository {
 
         Ok(row.into())
     }
-}
-
-pub fn now_ms() -> i64 {
-    let milliseconds = time::OffsetDateTime::now_utc().unix_timestamp_nanos() / 1_000_000;
-    i64::try_from(milliseconds).expect("current Unix timestamp must fit in i64 milliseconds")
 }
 
 #[cfg(test)]

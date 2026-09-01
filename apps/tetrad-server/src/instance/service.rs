@@ -22,6 +22,7 @@ impl From<GetInstanceError> for InstanceError {
         match error {
             GetInstanceError::NotFound => Self::NotFound,
 
+            //@TODO: Change to match auth service.rs to preserve error chain
             GetInstanceError::Repository(error) => Self::Storage(Box::new(error)),
         }
     }
