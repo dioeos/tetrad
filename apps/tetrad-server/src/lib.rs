@@ -10,7 +10,7 @@ use tracing::info;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 use crate::{
-    instance::{Instance, InstanceService},
+    instance::{Instance, InstanceService, router as InstanceRouter},
     state::AppState,
 };
 
@@ -51,6 +51,7 @@ pub async fn run(config: Config) -> anyhow::Result<()> {
 
     let app = Router::new()
         .route("/", get(|| async { "Hello, World!" }))
+        .merge(InstanceRouter())
         .with_state(state)
         .layer(TraceLayer::new_for_http());
 
