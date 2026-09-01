@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use axum::extract::FromRef;
 use sqlx::SqlitePool;
 
 use crate::{Config, instance::InstanceService};
@@ -8,7 +9,7 @@ use crate::{Config, instance::InstanceService};
 pub(crate) struct AppState {
     pub(crate) db: SqlitePool,
     pub(crate) config: Arc<Config>,
-    pub(crate) instance_service: Arc<InstanceService>
+    pub(crate) instance_service: InstanceService
 }
 
 impl AppState {
@@ -20,7 +21,13 @@ impl AppState {
         Self {
             db,
             config: Arc::new(config),
-            instance_service: Arc::new(instance_service)
+            instance_service
         }
+    }
+}
+
+impl FromRef<AppState> for InstanceService {
+    fn from_ref(app_state: &AppState) -> InstanceService {
+        app_state.instance_service.clone()
     }
 }

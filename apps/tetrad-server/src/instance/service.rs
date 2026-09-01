@@ -50,6 +50,7 @@ impl From<EnsureInstanceExistsError> for InstanceError {
     }
 }
 
+#[derive(Clone)]
 pub(crate) struct InstanceService {
     //service use cases
     get_instance: GetInstance,

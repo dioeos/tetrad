@@ -13,6 +13,7 @@ pub(in crate::instance) enum EnsureInstanceExistsError {
     Repository(#[from] RepositoryError),
 }
 
+#[derive(Clone)]
 pub(in crate::instance) struct EnsureInstanceExists {
     repository: Arc<dyn InstanceRepository>,
 }

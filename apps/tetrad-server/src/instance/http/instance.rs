@@ -1,5 +1,5 @@
 use super::error::InstanceHttpError;
-use crate::{instance::Instance, state::AppState};
+use crate::{instance::{Instance, InstanceService}};
 
 use axum::{Json, extract::State};
 use serde::Serialize;
@@ -22,8 +22,8 @@ impl From<Instance> for InstanceDto {
 }
 
 pub(crate) async fn get_instance(
-    State(state): State<AppState>,
+    State(instance_service): State<InstanceService>,
 ) -> Result<Json<InstanceDto>, InstanceHttpError> {
-    let instance = state.instance_service.get().await?;
+    let instance = instance_service.get().await?;
     Ok(Json(instance.into()))
 }
