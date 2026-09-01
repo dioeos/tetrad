@@ -46,6 +46,14 @@ pub async fn run(config: Config) -> anyhow::Result<()> {
         .with(tracing_subscriber::fmt::layer())
         .init();
 
+    info!(
+        db_url = &config.database_url,
+        bind_address = %config.bind_address,
+        instance = &config.instance_name,
+        base_url = &config.base_url,
+        "tetrad server configurations"
+    );
+
     let db: SqlitePool = database::connect(&config.database_url).await?;
     database::migrate(&db).await?;
 
