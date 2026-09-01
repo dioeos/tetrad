@@ -51,6 +51,7 @@ impl From<EnsureInstanceExistsError> for InstanceError {
 }
 
 pub(crate) struct InstanceService {
+    //service use cases
     get_instance: GetInstance,
     ensure_exists_instance: EnsureInstanceExists,
 }
@@ -69,5 +70,66 @@ impl InstanceService {
 
     pub(crate) async fn ensure_exists(&self, name: &str) -> Result<Instance, InstanceError> {
         Ok(self.ensure_exists_instance.execute(name).await?)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::sync::Arc;
+    use async_trait::async_trait;
+    use super::{InstanceError, InstanceService};
+    use crate::instance::{
+        model::Instance,
+        repository::{InstanceRepository, RepositoryError}
+    };
+
+    struct EmptyRepository;
+
+    #[async_trait]
+    impl InstanceRepository for EmptyRepository {
+        async fn get(&self) -> Result<Option<Instance>, RepositoryError> {
+            Ok(None)
+        }
+
+        async fn ensure_exists(&self, _name: &str) -> Result<Instance, RepositoryError> {
+            unreachable!("this test repository only supports get()")
+        }
+    }
+
+    struct BrokenRepository;
+
+    #[async_trait]
+    impl InstanceRepository for BrokenRepository {
+        async fn get(&self) -> Result<Option<Instance>, RepositoryError> {
+            Err(RepositoryError::Database(sqlx::Error::PoolClosed))
+        }
+
+        async fn ensure_exists(&self, _name: &str) -> Result<Instance, RepositoryError> {
+            Err(RepositoryError::Database(sqlx::Error::PoolClosed))
+        }
+    }
+
+    #[tokio::test]
+    async fn get_maps_missing_instance_to_not_found() {
+        let service = InstanceService::new(Arc::new(EmptyRepository));
+        let result = service.get().await;
+
+        assert!(matches!(result, Err(InstanceError::NotFound)));
+    }
+
+    #[tokio::test]
+    async fn get_maps_repository_failure_to_storage_error() {
+        let service = InstanceService::new(Arc::new(BrokenRepository));
+        let result = service.get().await;
+
+        assert!(matches!(result, Err(InstanceError::Storage(_))));
+    }
+
+    #[tokio::test]
+    async fn ensure_exists_maps_repository_failure_to_storage_error() {
+        let service = InstanceService::new(Arc::new(BrokenRepository));
+        let result = service.ensure_exists("test-instance").await;
+
+        assert!(matches!(result, Err(InstanceError::Storage(_))));
     }
 }
