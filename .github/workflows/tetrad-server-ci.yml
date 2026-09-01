@@ -1,0 +1,48 @@
+name: tetrad-server CI
+
+on:
+  pull_request:
+    paths:
+      - "apps/tetrad-server/**"
+      - ".github/workflows/tetrad-server-ci.yml"
+  push:
+    branches: [ main ]
+    paths:
+      - "apps/tetrad-server/**"
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: apps/tetrad-server
+
+jobs:
+  lint-server:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+
+      - name: Check formatting
+        run: cargo fmt --check
+
+      - name: Clippy
+        run: cargo clippy --all-targets --all-features -- -D warnings
+
+  test-server:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+
+      - name: Cargo tests
+        run: cargo test --all-targets -- --no-fail-fast
