@@ -155,10 +155,7 @@ mod tests {
 
         assert_eq!(ensured.id, result.id);
         assert_eq!(ensured.name, result.name);
-        assert_eq!(
-            ensured.setup_completed_at_ms,
-            result.setup_completed_at_ms
-        )
+        assert_eq!(ensured.setup_completed_at_ms, result.setup_completed_at_ms)
     }
 
     #[sqlx::test(migrations = "./migrations")]

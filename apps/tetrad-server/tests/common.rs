@@ -7,7 +7,7 @@ pub fn test_config() -> Config {
         "sqlite::memory:",
         "127.0.0.1:0".parse().unwrap(),
         "integration-test-instance",
-        "http://localhost"
+        "http://localhost",
     )
 }
 

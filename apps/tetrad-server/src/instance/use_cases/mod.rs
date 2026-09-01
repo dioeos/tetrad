@@ -1,12 +1,6 @@
-mod get;
 mod ensure_exists;
+mod get;
 
-pub(super) use ensure_exists::{
-    EnsureInstanceExists,
-    EnsureInstanceExistsError
-};
+pub(super) use ensure_exists::{EnsureInstanceExists, EnsureInstanceExistsError};
 
-pub(super) use get::{
-    GetInstance,
-    GetInstanceError
-};
+pub(super) use get::{GetInstance, GetInstanceError};

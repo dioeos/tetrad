@@ -51,9 +51,7 @@ impl IntoResponse for InstanceHttpError {
 impl From<InstanceError> for InstanceHttpError {
     fn from(error: InstanceError) -> Self {
         match error {
-            InstanceError::NotFound => {
-                InstanceHttpError::not_found("instance not found")
-            }
+            InstanceError::NotFound => InstanceHttpError::not_found("instance not found"),
             InstanceError::Storage(source) => {
                 error!(
                     error = ?source,
@@ -64,4 +62,3 @@ impl From<InstanceError> for InstanceHttpError {
         }
     }
 }
-

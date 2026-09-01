@@ -1,19 +1,11 @@
-use std::{
-    sync::Arc,
-    error::Error
-};
+use std::{error::Error, sync::Arc};
 
 use thiserror::Error;
 
 use super::{
     model::Instance,
     repository::InstanceRepository,
-    use_cases::{
-        EnsureInstanceExists,
-        EnsureInstanceExistsError,
-        GetInstance,
-        GetInstanceError
-    }
+    use_cases::{EnsureInstanceExists, EnsureInstanceExistsError, GetInstance, GetInstanceError},
 };
 
 #[derive(Debug, Error)]
@@ -22,10 +14,7 @@ pub(crate) enum InstanceError {
     NotFound,
 
     #[error("instance storage operation failed")]
-    Storage(
-        #[source]
-        Box<dyn Error + Send + Sync>
-    ),
+    Storage(#[source] Box<dyn Error + Send + Sync>),
 }
 
 impl From<GetInstanceError> for InstanceError {
@@ -33,9 +22,7 @@ impl From<GetInstanceError> for InstanceError {
         match error {
             GetInstanceError::NotFound => Self::NotFound,
 
-            GetInstanceError::Repository(error) => {
-                Self::Storage(Box::new(error))
-            }
+            GetInstanceError::Repository(error) => Self::Storage(Box::new(error)),
         }
     }
 }
@@ -43,9 +30,7 @@ impl From<GetInstanceError> for InstanceError {
 impl From<EnsureInstanceExistsError> for InstanceError {
     fn from(error: EnsureInstanceExistsError) -> Self {
         match error {
-            EnsureInstanceExistsError::Repository(error) => {
-                Self::Storage(Box::new(error))
-            }
+            EnsureInstanceExistsError::Repository(error) => Self::Storage(Box::new(error)),
         }
     }
 }
@@ -76,13 +61,13 @@ impl InstanceService {
 
 #[cfg(test)]
 mod tests {
-    use std::sync::Arc;
-    use async_trait::async_trait;
     use super::{InstanceError, InstanceService};
     use crate::instance::{
         model::Instance,
-        repository::{InstanceRepository, RepositoryError}
+        repository::{InstanceRepository, RepositoryError},
     };
+    use async_trait::async_trait;
+    use std::sync::Arc;
 
     struct EmptyRepository;
 

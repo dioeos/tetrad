@@ -1,5 +1,5 @@
 use super::error::InstanceHttpError;
-use crate::{instance::{Instance, InstanceService}};
+use crate::instance::{Instance, InstanceService};
 
 use axum::{Json, extract::State};
 use serde::Serialize;
