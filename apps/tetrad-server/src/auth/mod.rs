@@ -13,6 +13,7 @@ use sqlite::SqliteAuthRepository;
 
 use sqlx::SqlitePool;
 
+pub(crate) use http::{public_router, protected_router};
 pub(crate) use model::User;
 pub(crate) use backend::TetradAuthBackend;
 pub(crate) use service::{AuthError, AuthService};

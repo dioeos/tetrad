@@ -1,21 +1,22 @@
+mod auth;
 mod common;
 mod config;
 mod database;
 mod instance;
 mod state;
-mod auth;
 
 use axum::{Router, routing::get};
-use axum_login::AuthManagerLayerBuilder;
+use axum_login::{
+    AuthManagerLayerBuilder, login_required, tower_sessions::{MemoryStore, SessionManagerLayer}
+};
 use sqlx::SqlitePool;
 use tower_http::trace::TraceLayer;
-use tower_sessions::{MemoryStore, SessionManagerLayer};
 use tracing::info;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 use crate::{
-    instance::{Instance, InstanceService, router as InstanceRouter},
-    auth::{AuthService, TetradAuthBackend},
+    auth::{AuthService, TetradAuthBackend, public_router as auth_public_router, protected_router as auth_protected_router},
+    instance::{Instance, InstanceService, router as instance_router},
     state::AppState,
 };
 
@@ -41,16 +42,20 @@ pub async fn build_app(db: SqlitePool, config: Config) -> anyhow::Result<Router>
     let auth_backend = TetradAuthBackend::new(auth_service.clone());
     let auth_layer = AuthManagerLayerBuilder::new(auth_backend, session_layer).build();
 
-    let state = AppState::new(
-        db,
-        config,
-        instance_service,
-        auth_service
-    );
+    let state = AppState::new(db, config, instance_service, auth_service);
+
+    let public_api = Router::new()
+        .merge(instance_router())
+        .merge(auth_public_router());
+
+    let protected_api = Router::new()
+        .merge(auth_protected_router())
+        .route_layer(login_required!(TetradAuthBackend, login_url = "/login"));
 
     Ok(Router::new()
-        .route("/", get(|| async { "Hellow, World!" }))
-        .merge(InstanceRouter())
+        .route("/", get(|| async { "Hello, World!" }))
+        .merge(public_api)
+        .merge(protected_api)
         .with_state(state)
         .layer(TraceLayer::new_for_http())
         .layer(auth_layer))

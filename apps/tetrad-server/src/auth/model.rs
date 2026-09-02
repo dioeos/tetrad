@@ -1,4 +1,5 @@
 use axum_login::AuthUser;
+use serde::Deserialize;
 use uuid::Uuid;
 
 pub(in crate::auth) struct NewUser {
@@ -47,7 +48,7 @@ impl AuthUser for User {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Deserialize)]
 pub(crate) struct Credentials {
     pub(crate) username: String,
     pub(crate) password: String,

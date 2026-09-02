@@ -1,8 +1,8 @@
-use crate::auth::AuthError;
+use crate::auth::{AuthError, TetradAuthBackend};
 
 use axum::{
     Json,
-    http::StatusCode,
+    http::{StatusCode, status},
     response::{IntoResponse, Response},
 };
 use serde::Serialize;
@@ -60,6 +60,26 @@ impl AuthHttpError {
             },
         }
     }
+
+    pub(super) fn invalid_credentials() -> Self {
+        Self {
+            status: StatusCode::UNAUTHORIZED,
+            body: AuthErrorDto {
+                code: "invalid_credentials",
+                message: "invalid username or password",
+            },
+        }
+    }
+
+    pub(super) fn unauthorized(message: &'static str) -> Self {
+        Self {
+            status: StatusCode::UNAUTHORIZED,
+            body: AuthErrorDto {
+                code: "unauthorized",
+                message
+            }
+        }
+    }
 }
 
 impl IntoResponse for AuthHttpError {
@@ -78,13 +98,32 @@ impl From<AuthError> for AuthHttpError {
                 );
                 AuthHttpError::internal_server_error("an unexpected error occured")
             }
-            AuthError::InvalidUsername => AuthHttpError::bad_request("invalid username"),
+            AuthError::InvalidUsername => {
+                tracing::warn!("user creation rejected due to invalid username");
+                AuthHttpError::bad_request("invalid username")
+            }
             AuthError::InvalidPassword => {
                 //newly selected password fails password rules
+                tracing::warn!("user creation rejected due to invalid password");
                 AuthHttpError::bad_request("invalid password")
             }
             AuthError::UsernameAlreadyTaken => AuthHttpError::conflict("username is already taken"),
             AuthError::UserNotFound => AuthHttpError::not_found("user not found"),
+        }
+    }
+}
+
+impl From<axum_login::Error<TetradAuthBackend>> for AuthHttpError {
+    fn from(error: axum_login::Error<TetradAuthBackend>) -> Self {
+        match error {
+            axum_login::Error::Backend(error) => error.into(),
+            axum_login::Error::Session(error) => {
+                error!(
+                    error = ?error,
+                    "authentication session operation failed"
+                );
+                AuthHttpError::internal_server_error("an unexpected error occured")
+            }
         }
     }
 }

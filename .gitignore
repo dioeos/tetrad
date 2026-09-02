@@ -9,3 +9,4 @@ apps/tetrad-server/data/*.sqlite3
 apps/tetrad-server/data/*.db
 apps/tetrad-server/data/*.db-*
 apps/tetrad-server/data/*.sqlite3-*
+apps/tetrad-server/cookies.txt

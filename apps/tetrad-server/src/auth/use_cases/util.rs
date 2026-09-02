@@ -1,6 +1,6 @@
 use super::CreateUserError;
 
-pub(super) fn validate_username(username: String) -> Result<String, CreateUserError> {
+pub(super) fn validate_username(username: &str) -> Result<&str, CreateUserError> {
     let username = username.trim();
     if !(3..=32).contains(&username.len()) {
         return Err(CreateUserError::InvalidUsername);
@@ -13,9 +13,21 @@ pub(super) fn validate_username(username: String) -> Result<String, CreateUserEr
         return Err(CreateUserError::InvalidUsername);
     }
 
-    Ok(username.to_owned())
+    Ok(username)
 }
 
-pub(super) fn normalize_username(username: String) -> String {
-    username.trim().to_ascii_uppercase()
+pub(super) fn validate_password(password: &str) -> Result<&str, CreateUserError> {
+    let password = password.trim();
+    let length = password.chars().count();
+
+    if !(12..=256).contains(&length) {
+        return Err(CreateUserError::InvalidPassword);
+    }
+
+    Ok(password)
 }
+
+pub(super) fn normalize_username(username: &str) -> String  {
+    username.trim().to_ascii_lowercase()
+}
+

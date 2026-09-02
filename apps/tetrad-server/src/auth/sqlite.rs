@@ -12,7 +12,7 @@ use super::{
 #[derive(Debug, FromRow)]
 struct UserRow {
     internal_id: i64,
-    external_id: Uuid,
+    external_id: String,
     username: String,
     normalized_username: String,
     password_hash: String,
@@ -22,7 +22,7 @@ impl From<UserRow> for User {
     fn from(row: UserRow) -> Self {
         Self {
             internal_id: row.internal_id,
-            external_id: row.external_id,
+            external_id: Uuid::parse_str(&row.external_id).expect("stored user external_id must be a UUID"),
             username: row.username,
             normalized_username: row.normalized_username,
             password_hash: row.password_hash,
@@ -58,9 +58,9 @@ impl AuthRepository for SqliteAuthRepository {
             VALUES (?, ?, ?, ?, ?)
             "#,
         )
-        .bind(&new_user.external_id.to_string())
-        .bind(&new_user.username)
-        .bind(&new_user.normalized_username)
+        .bind(new_user.external_id.to_string())
+        .bind(new_user.username)
+        .bind(new_user.normalized_username)
         .bind(created_at_ms)
         .bind(created_at_ms)
         .execute(&mut *transaction)
@@ -112,12 +112,15 @@ impl AuthRepository for SqliteAuthRepository {
         let row = sqlx::query_as::<_, UserRow>(
             r#"
             SELECT
-                id AS internal_id,
-                external_id,
-                username,
-                normalized_username
-            FROM users
-            WHERE normalized_username = ?
+                u.id AS internal_id,
+                u.external_id,
+                u.username,
+                u.normalized_username,
+                pc.password_hash
+            FROM users AS u
+            INNER JOIN password_credentials AS pc
+                ON pc.user_id = u.id
+            WHERE u.normalized_username = ?
             "#,
         )
         .bind(normalized_username)
@@ -131,15 +134,40 @@ impl AuthRepository for SqliteAuthRepository {
         let row = sqlx::query_as::<_, UserRow>(
             r#"
             SELECT
-                id AS internal_id,
-                external_id,
-                username,
-                normalized_username
-            FROM users
-            WHERE id = ?
+                u.id AS internal_id,
+                u.external_id,
+                u.username,
+                u.normalized_username,
+                pc.password_hash
+            FROM users AS u
+            INNER JOIN password_credentials AS pc
+                ON pc.user_id = u.id
+            WHERE u.id = ?
             "#,
         )
         .bind(internal_id)
+        .fetch_optional(&self.db)
+        .await?;
+
+        Ok(row.map(User::from))
+    }
+
+    async fn get_user_by_normalized_username(&self, normalized_username: &str) -> Result<Option<User>, AuthRepositoryError> {
+        let row = sqlx::query_as::<_, UserRow>(
+            r#"
+            SELECT
+                u.id AS internal_id,
+                u.external_id,
+                u.username,
+                u.normalized_username,
+                pc.password_hash
+            FROM users AS u
+            INNER JOIN password_credentials AS pc
+                ON pc.user_id = u.id
+            WHERE u.normalized_username = ?
+            "#,
+        )
+        .bind(normalized_username)
         .fetch_optional(&self.db)
         .await?;
 

@@ -1,7 +1,10 @@
 use super::error::AuthHttpError;
-use crate::auth::{AuthService, User, model::CreateUserInput};
+use crate::auth::{
+    AuthService, TetradAuthBackend, User,
+    model::{CreateUserInput, Credentials},
+};
 
-use axum::{Json, extract::State};
+use axum::{Form, Json, extract::State, http::StatusCode};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize)]
@@ -20,7 +23,7 @@ impl From<User> for UserDto {
 }
 
 #[derive(Deserialize)]
-struct CreateUserRequest {
+pub(crate) struct CreateUserRequest {
     username: String,
     password: String,
 }
@@ -34,10 +37,31 @@ impl From<CreateUserRequest> for CreateUserInput {
     }
 }
 
-async fn create_user(
+pub(crate) async fn create_user(
     State(auth_service): State<AuthService>,
     Json(request): Json<CreateUserRequest>,
 ) -> Result<Json<UserDto>, AuthHttpError> {
     let user = auth_service.create_user(request.into()).await?;
     Ok(Json(user.into()))
+}
+
+type AuthSession = axum_login::AuthSession<TetradAuthBackend>;
+
+pub(crate) async fn login(mut auth_session: AuthSession, Form(creds): Form<Credentials>) -> Result<StatusCode, AuthHttpError> {
+    let user = auth_session
+        .authenticate(creds)
+        .await?
+        .ok_or_else(AuthHttpError::invalid_credentials)?;
+
+    auth_session.login(&user).await?;
+
+    Ok(StatusCode::NO_CONTENT)
+}
+
+pub(crate) async fn me(auth_session: AuthSession) -> Result<Json<UserDto>, AuthHttpError> {
+    let current_user: User = auth_session
+        .user
+        .ok_or_else(|| AuthHttpError::unauthorized("authentication required"))?;
+
+    Ok(Json(current_user.into()))
 }
