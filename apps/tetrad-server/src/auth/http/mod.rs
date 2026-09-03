@@ -10,9 +10,9 @@ use crate::state::AppState;
 
 pub(crate) fn public_router() -> Router<AppState> {
     Router::new()
-        .route("/user", post(auth::create_user))
+        .route("/users", post(auth::create_user))
         .route("/login", post(auth::login))
-        .route("/user/{username}", get(auth::get_user_by_username))
+        .route("/users/{username}", get(auth::get_user_by_username))
 }
 
 pub(crate) fn protected_router() -> Router<AppState> {
