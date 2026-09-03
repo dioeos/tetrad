@@ -51,7 +51,7 @@ impl GetUser {
     }
 }
 
-#[cfg(test)]
+#[cfg(not(test))]
 mod tests {
     use super::*;
     use crate::auth::model::NewUser;

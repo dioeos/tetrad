@@ -1,4 +1,9 @@
-mod auth;
+// @NOTE: Custom auth implementation that is no longer used 
+//        due to the integration of `torii`. However, the module is
+//        still present primarily for reference and due to `torii` 
+//        beingin its early stages
+// mod auth;
+
 mod common;
 mod config;
 mod database;
@@ -6,20 +11,12 @@ mod instance;
 mod state;
 
 use axum::{Router, routing::get};
-use axum_login::{
-    AuthManagerLayerBuilder, login_required,
-    tower_sessions::{MemoryStore, SessionManagerLayer},
-};
 use sqlx::SqlitePool;
 use tower_http::trace::TraceLayer;
 use tracing::info;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 use crate::{
-    auth::{
-        AuthService, TetradAuthBackend, protected_router as auth_protected_router,
-        public_router as auth_public_router,
-    },
     instance::{Instance, InstanceService, router as instance_router},
     state::AppState,
 };
@@ -28,7 +25,6 @@ pub use config::Config;
 
 pub async fn build_app(db: SqlitePool, config: Config) -> anyhow::Result<Router> {
     let instance_service: InstanceService = instance::create_service(db.clone());
-    let auth_service: AuthService = auth::create_service(db.clone());
 
     let current_instance: Instance = instance_service
         .ensure_exists(&config.instance_name)
@@ -40,29 +36,15 @@ pub async fn build_app(db: SqlitePool, config: Config) -> anyhow::Result<Router>
         "instance initialized"
     );
 
-    let session_store = MemoryStore::default();
-    let session_layer = SessionManagerLayer::new(session_store);
+    let state = AppState::new(db, config, instance_service);
 
-    let auth_backend = TetradAuthBackend::new(auth_service.clone());
-    let auth_layer = AuthManagerLayerBuilder::new(auth_backend, session_layer).build();
-
-    let state = AppState::new(db, config, instance_service, auth_service);
-
-    let public_api = Router::new()
-        .merge(instance_router())
-        .merge(auth_public_router());
-
-    let protected_api = Router::new()
-        .merge(auth_protected_router())
-        .route_layer(login_required!(TetradAuthBackend, login_url = "/login"));
+    let public_api = Router::new().merge(instance_router());
 
     Ok(Router::new()
         .route("/", get(|| async { "Hello, World!" }))
         .merge(public_api)
-        .merge(protected_api)
         .with_state(state)
-        .layer(TraceLayer::new_for_http())
-        .layer(auth_layer))
+        .layer(TraceLayer::new_for_http()))
 }
 
 pub async fn run(config: Config) -> anyhow::Result<()> {

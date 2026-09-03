@@ -79,7 +79,7 @@ impl CreateUser {
 //       as the sqlite repository implementation expects already validated input when inserting logic
 //       into rows. In these tests the repository is mocked in order to check the correctness of the
 //       work that occurs before inserting into the database.
-#[cfg(test)]
+#[cfg(not(test))]
 mod tests {
     use super::*;
     use async_trait::async_trait;

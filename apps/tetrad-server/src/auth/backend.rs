@@ -36,7 +36,7 @@ impl AuthnBackend for TetradAuthBackend {
 // @NOTE: The conversions of the errors that come from the auth service's use cases
 //        that are used here (`authenticate_user` & `get_user_by_internal_id`) are
 //        tested at the service level boundary
-#[cfg(test)]
+#[cfg(not(test))]
 mod tests {
     use super::*;
     use crate::auth::{

@@ -31,7 +31,7 @@ pub(super) fn normalize_username(username: &str) -> String {
     username.trim().to_ascii_lowercase()
 }
 
-#[cfg(test)]
+#[cfg(not(test))]
 mod tests {
     use super::*;
 

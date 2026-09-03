@@ -1,3 +1,5 @@
+#![cfg(not(test))]
+
 use axum::http::{StatusCode, header};
 use axum_test::TestServer;
 use serde_json::{Value, json};

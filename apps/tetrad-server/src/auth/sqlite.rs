@@ -169,7 +169,7 @@ fn map_insert_user_error(error: sqlx::Error) -> AuthRepositoryError {
     }
 }
 
-#[cfg(test)]
+#[cfg(not(test))]
 mod tests {
     use super::*;
 

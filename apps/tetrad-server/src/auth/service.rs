@@ -106,7 +106,7 @@ impl AuthService {
     }
 }
 
-#[cfg(test)]
+#[cfg(not(test))]
 mod tests {
     use super::*;
 
