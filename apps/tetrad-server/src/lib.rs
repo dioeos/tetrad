@@ -1,6 +1,6 @@
-// @NOTE: Custom auth implementation that is no longer used 
+// @NOTE: Custom auth implementation that is no longer used
 //        due to the integration of `torii`. However, the module is
-//        still present primarily for reference and due to `torii` 
+//        still present primarily for reference and due to `torii`
 //        beingin its early stages
 // mod auth;
 
@@ -8,16 +8,24 @@ mod common;
 mod config;
 mod database;
 mod instance;
+mod profile;
 mod state;
+mod torii_tetrad;
+
+use std::sync::Arc;
 
 use axum::{Router, routing::get};
 use sqlx::SqlitePool;
+use torii::Torii;
+use torii_storage_seaorm::SeaORMStorage;
 use tower_http::trace::TraceLayer;
 use tracing::info;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 use crate::{
     instance::{Instance, InstanceService, router as instance_router},
+    torii_tetrad::custom_torii_auth_router,
+    profile::ProfileService,
     state::AppState,
 };
 
@@ -25,6 +33,7 @@ pub use config::Config;
 
 pub async fn build_app(db: SqlitePool, config: Config) -> anyhow::Result<Router> {
     let instance_service: InstanceService = instance::create_service(db.clone());
+    let profile_service: ProfileService = profile::create_service(db.clone());
 
     let current_instance: Instance = instance_service
         .ensure_exists(&config.instance_name)
@@ -36,13 +45,20 @@ pub async fn build_app(db: SqlitePool, config: Config) -> anyhow::Result<Router>
         "instance initialized"
     );
 
-    let state = AppState::new(db, config, instance_service);
+    let storage = SeaORMStorage::connect(&config.database_url).await?;
+    storage.migrate().await?;
 
-    let public_api = Router::new().merge(instance_router());
+    let repos = Arc::new(storage.into_repository_provider());
+    let torii = Arc::new(Torii::new(repos));
+
+    let state = AppState::new(db, config, torii, instance_service, profile_service);
+
+    let auth_routes = Router::new().merge(custom_torii_auth_router());
 
     Ok(Router::new()
         .route("/", get(|| async { "Hello, World!" }))
-        .merge(public_api)
+        .merge(instance_router())
+        .nest("/auth", auth_routes)
         .with_state(state)
         .layer(TraceLayer::new_for_http()))
 }
