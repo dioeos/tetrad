@@ -7,7 +7,8 @@ mod state;
 
 use axum::{Router, routing::get};
 use axum_login::{
-    AuthManagerLayerBuilder, login_required, tower_sessions::{MemoryStore, SessionManagerLayer}
+    AuthManagerLayerBuilder, login_required,
+    tower_sessions::{MemoryStore, SessionManagerLayer},
 };
 use sqlx::SqlitePool;
 use tower_http::trace::TraceLayer;
@@ -15,7 +16,10 @@ use tracing::info;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 use crate::{
-    auth::{AuthService, TetradAuthBackend, public_router as auth_public_router, protected_router as auth_protected_router},
+    auth::{
+        AuthService, TetradAuthBackend, protected_router as auth_protected_router,
+        public_router as auth_public_router,
+    },
     instance::{Instance, InstanceService, router as instance_router},
     state::AppState,
 };

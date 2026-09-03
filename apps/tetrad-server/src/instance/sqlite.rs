@@ -6,7 +6,7 @@ use crate::common::time;
 
 use super::{
     model::Instance,
-    repository::{InstanceRepository, RepositoryError}
+    repository::{InstanceRepository, RepositoryError},
 };
 
 #[derive(Debug, FromRow)]

@@ -1,7 +1,10 @@
-mod error;
 mod auth;
+mod error;
 
-use axum::{Router, routing::{get, post}};
+use axum::{
+    Router,
+    routing::{get, post},
+};
 
 use crate::state::AppState;
 
@@ -13,6 +16,5 @@ pub(crate) fn public_router() -> Router<AppState> {
 }
 
 pub(crate) fn protected_router() -> Router<AppState> {
-    Router::new()
-        .route("/me", get(auth::me))
+    Router::new().route("/me", get(auth::me))
 }

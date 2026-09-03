@@ -35,10 +35,8 @@ pub(in crate::auth) enum CreateUserError {
 impl From<AuthRepositoryError> for CreateUserError {
     fn from(error: AuthRepositoryError) -> Self {
         match error {
-            AuthRepositoryError::UsernameAlreadyExists => {
-                CreateUserError::UsernameAlreadyTaken
-            }
-            error => CreateUserError::Repository(error)
+            AuthRepositoryError::UsernameAlreadyExists => CreateUserError::UsernameAlreadyTaken,
+            error => CreateUserError::Repository(error),
         }
     }
 }
@@ -90,21 +88,21 @@ mod tests {
 
     struct AuthRepositoryMock {
         created_user: Mutex<Option<User>>,
-        created_error: Mutex<Option<AuthRepositoryError>>
+        created_error: Mutex<Option<AuthRepositoryError>>,
     }
 
     impl AuthRepositoryMock {
         fn succeeding() -> Self {
             Self {
                 created_user: Mutex::new(None),
-                created_error: Mutex::new(None)
+                created_error: Mutex::new(None),
             }
         }
 
         fn failing(error: AuthRepositoryError) -> Self {
             Self {
                 created_user: Mutex::new(None),
-                created_error: Mutex::new(Some(error))
+                created_error: Mutex::new(Some(error)),
             }
         }
 
@@ -138,13 +136,13 @@ mod tests {
         }
         async fn get_user_by_internal_id(
             &self,
-            _internal_id: i64
+            _internal_id: i64,
         ) -> Result<Option<User>, AuthRepositoryError> {
             panic!("get_user_by_internal_id should not be called in create_user use case");
         }
         async fn get_user_by_normalized_username(
             &self,
-            _normalized_username: &str
+            _normalized_username: &str,
         ) -> Result<Option<User>, AuthRepositoryError> {
             panic!("get_user_by_normalized_username should not be called in create_user use case");
         }
@@ -157,7 +155,7 @@ mod tests {
 
         let input = CreateUserInput {
             username: "    UsernamE    ".to_owned(),
-            password: "correct password".to_owned()
+            password: "correct password".to_owned(),
         };
 
         let user = create_user.execute(input.clone()).await.unwrap();
@@ -167,14 +165,9 @@ mod tests {
         assert_eq!(created_user.normalized_username, "username");
         assert!(!created_user.external_id.is_nil());
 
-        assert_ne!(
-            created_user.password_hash,
-            "correct password"
-        );
+        assert_ne!(created_user.password_hash, "correct password");
 
-        assert!(
-            verify_password(input.password, &created_user.password_hash).is_ok()
-        );
+        assert!(verify_password(input.password, &created_user.password_hash).is_ok());
 
         assert_eq!(created_user.internal_id, user.internal_id);
         assert_eq!(created_user.external_id, user.external_id);
@@ -182,16 +175,14 @@ mod tests {
 
     #[tokio::test]
     async fn converts_repository_error_to_create_user_repository_error() {
-        let repo = Arc::new(
-            AuthRepositoryMock::failing(
-                AuthRepositoryError::Database(sqlx::Error::PoolClosed)
-            )
-        );
+        let repo = Arc::new(AuthRepositoryMock::failing(AuthRepositoryError::Database(
+            sqlx::Error::PoolClosed,
+        )));
 
         let create_user = CreateUser::new(repo);
         let input = CreateUserInput {
             username: "    UsernamE    ".to_owned(),
-            password: "correct password".to_owned()
+            password: "correct password".to_owned(),
         };
 
         let result = create_user.execute(input).await;

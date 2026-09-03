@@ -4,7 +4,8 @@ use thiserror::Error;
 
 use crate::auth::{
     model::User,
-    repository::{AuthRepository, AuthRepositoryError}, use_cases::util::normalize_username,
+    repository::{AuthRepository, AuthRepositoryError},
+    use_cases::util::normalize_username,
 };
 
 #[derive(Debug, Error)]
@@ -162,10 +163,7 @@ mod tests {
         let repo = Arc::new(AuthRepositoryMock::empty());
         let get_user = GetUser::new(repo);
 
-        let user = get_user
-            .execute_by_username("username")
-            .await
-            .unwrap();
+        let user = get_user.execute_by_username("username").await.unwrap();
         assert!(user.is_none());
     }
 

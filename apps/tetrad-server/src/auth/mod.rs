@@ -13,9 +13,9 @@ use sqlite::SqliteAuthRepository;
 
 use sqlx::SqlitePool;
 
-pub(crate) use http::{public_router, protected_router};
-pub(crate) use model::User;
 pub(crate) use backend::TetradAuthBackend;
+pub(crate) use http::{protected_router, public_router};
+pub(crate) use model::User;
 pub(crate) use service::{AuthError, AuthService};
 
 pub(crate) fn create_service(db: SqlitePool) -> AuthService {

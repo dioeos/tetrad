@@ -2,7 +2,7 @@ use crate::auth::{AuthError, TetradAuthBackend};
 
 use axum::{
     Json,
-    http::{StatusCode},
+    http::StatusCode,
     response::{IntoResponse, Response},
 };
 use serde::Serialize;
@@ -66,8 +66,8 @@ impl AuthHttpError {
             status: StatusCode::UNAUTHORIZED,
             body: AuthErrorDto {
                 code: "unauthorized",
-                message
-            }
+                message,
+            },
         }
     }
 
@@ -76,8 +76,8 @@ impl AuthHttpError {
             status: StatusCode::NOT_FOUND,
             body: AuthErrorDto {
                 code: "not_found",
-                message
-            }
+                message,
+            },
         }
     }
 }

@@ -4,7 +4,11 @@ use crate::auth::{
     model::{CreateUserInput, Credentials},
 };
 
-use axum::{Form, Json, extract::{Path, State}, http::StatusCode};
+use axum::{
+    Form, Json,
+    extract::{Path, State},
+    http::StatusCode,
+};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize)]
@@ -47,11 +51,14 @@ pub(crate) async fn create_user(
 
 type AuthSession = axum_login::AuthSession<TetradAuthBackend>;
 
-pub(crate) async fn login(mut auth_session: AuthSession, Form(creds): Form<Credentials>) -> Result<StatusCode, AuthHttpError> {
+pub(crate) async fn login(
+    mut auth_session: AuthSession,
+    Form(creds): Form<Credentials>,
+) -> Result<StatusCode, AuthHttpError> {
     //@NOTE: The error seen by the handler is not of type `AuthError`,
     //       but of type `axum_login::Error<TetradAuthBackend>, with its errors being
     //       wrapped as `axum_login::Error::Backend(auth_error)` or
-    //       `axum_login::Error::Session(auth_error) and being converted. Each of 
+    //       `axum_login::Error::Session(auth_error) and being converted. Each of
     //       these `axum_login::Error` variations are converted into an `AuthHttpError`
     let user = auth_session
         .authenticate(creds)
@@ -73,11 +80,11 @@ pub(crate) async fn me(auth_session: AuthSession) -> Result<Json<UserDto>, AuthH
 
 pub(crate) async fn get_user_by_username(
     State(auth_service): State<AuthService>,
-    Path(username): Path<String>
+    Path(username): Path<String>,
 ) -> Result<Json<UserDto>, AuthHttpError> {
     let user = auth_service
         .get_user_by_username(&username)
         .await?
         .ok_or_else(|| AuthHttpError::not_found("user not found"))?;
-    Ok(Json(user.into())) 
+    Ok(Json(user.into()))
 }

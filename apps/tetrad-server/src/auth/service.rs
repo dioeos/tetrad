@@ -95,10 +95,7 @@ impl AuthService {
         &self,
         username: &str,
     ) -> Result<Option<User>, AuthError> {
-        Ok(self
-            .get_user
-            .execute_by_username(username)
-            .await?)
+        Ok(self.get_user.execute_by_username(username).await?)
     }
 
     pub(crate) async fn authenticate_user(

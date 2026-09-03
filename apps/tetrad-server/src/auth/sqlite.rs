@@ -367,7 +367,7 @@ mod tests {
                 parent_id INTEGER,
                 FOREIGN KEY (parent_id) REFERENCES parent(id) DEFERRABLE INITIALLY DEFERRED
             );
-            "#
+            "#,
         )
         .execute(&pool)
         .await
@@ -380,7 +380,7 @@ mod tests {
             BEGIN
                 INSERT INTO child (parent_id) VALUES (99999);
             END;
-            "#
+            "#,
         )
         .execute(&pool)
         .await
@@ -391,14 +391,11 @@ mod tests {
             username: "Username".to_owned(),
             external_id: uuid::Uuid::now_v7(),
             normalized_username: "username".to_owned(),
-            password_hash: password_auth::generate_hash("password")
+            password_hash: password_auth::generate_hash("password"),
         };
         let result = repo.create_user(new).await;
 
-        assert!(matches!(
-                result,
-                Err(AuthRepositoryError::Database(_))
-        ));
+        assert!(matches!(result, Err(AuthRepositoryError::Database(_))));
         let row_length = get_user_row_len(pool).await;
         assert_eq!(row_length, 0);
     }

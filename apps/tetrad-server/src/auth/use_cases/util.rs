@@ -27,7 +27,7 @@ pub(super) fn validate_password(password: &str) -> Result<&str, CreateUserError>
     Ok(password)
 }
 
-pub(super) fn normalize_username(username: &str) -> String  {
+pub(super) fn normalize_username(username: &str) -> String {
     username.trim().to_ascii_lowercase()
 }
 
@@ -50,7 +50,8 @@ mod tests {
     }
 
     #[test]
-    fn validate_username_returns_invalid_username_when_not_all_ascii_alphanumeric_or_underscores_or_hyphens() {
+    fn validate_username_returns_invalid_username_when_not_all_ascii_alphanumeric_or_underscores_or_hyphens()
+     {
         let err1 = validate_username("user.name");
         let err2 = validate_username("user name");
         assert!(matches!(err1, Err(CreateUserError::InvalidUsername)));
@@ -71,4 +72,3 @@ mod tests {
         assert!(matches!(err, Err(CreateUserError::InvalidPassword)));
     }
 }
-

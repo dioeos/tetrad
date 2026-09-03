@@ -71,7 +71,7 @@ mod tests {
         fn failing(error: AuthRepositoryError) -> Self {
             Self {
                 existing_user: None,
-                error: Mutex::new(Some(error))
+                error: Mutex::new(Some(error)),
             }
         }
     }
@@ -120,7 +120,7 @@ mod tests {
 
         let creds = Credentials {
             username: "username".to_owned(),
-            password: "password".to_owned()
+            password: "password".to_owned(),
         };
 
         let user = backend.authenticate(creds).await.unwrap().unwrap();
@@ -137,7 +137,7 @@ mod tests {
 
         let creds = Credentials {
             username: "username".to_owned(),
-            password: "wrongpassword".to_owned()
+            password: "wrongpassword".to_owned(),
         };
 
         let result = backend.authenticate(creds).await.unwrap();
@@ -146,17 +146,15 @@ mod tests {
 
     #[tokio::test]
     async fn authenticate_converts_authenticate_user_repository_error_to_internal_auth_error() {
-        let repo = Arc::new(
-            AuthRepositoryMock::failing(
-                AuthRepositoryError::Database(sqlx::Error::PoolClosed)
-            )
-        );
+        let repo = Arc::new(AuthRepositoryMock::failing(AuthRepositoryError::Database(
+            sqlx::Error::PoolClosed,
+        )));
         let auth_service = AuthService::new(repo);
         let backend = TetradAuthBackend::new(auth_service);
 
         let creds = Credentials {
             username: "username".to_owned(),
-            password: "password".to_owned()
+            password: "password".to_owned(),
         };
 
         let result = backend.authenticate(creds).await;
@@ -189,11 +187,9 @@ mod tests {
 
     #[tokio::test]
     async fn get_user_converts_get_user_repository_error_to_internal_auth_error() {
-        let repo = Arc::new(
-            AuthRepositoryMock::failing(
-                AuthRepositoryError::Database(sqlx::Error::PoolClosed)
-            )
-        );
+        let repo = Arc::new(AuthRepositoryMock::failing(AuthRepositoryError::Database(
+            sqlx::Error::PoolClosed,
+        )));
         let auth_service = AuthService::new(repo);
         let backend = TetradAuthBackend::new(auth_service);
 

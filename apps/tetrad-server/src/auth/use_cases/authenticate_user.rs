@@ -221,16 +221,19 @@ mod tests {
             external_id: Uuid::now_v7(),
             username: "invalid_user".to_owned(),
             normalized_username: "invalid_user".to_owned(),
-            password_hash: "not-a-valid-hash".to_owned()
+            password_hash: "not-a-valid-hash".to_owned(),
         };
         let repo = Arc::new(AuthRepositoryMock::returning(invalid_pw_hash_user));
         let authenticate_user = AuthenticateUser::new(repo);
         let credentials = Credentials {
             username: "invalid_user".to_owned(),
-            password: "not-a-valid-hash".to_owned()
+            password: "not-a-valid-hash".to_owned(),
         };
 
         let result = authenticate_user.execute(credentials).await;
-        assert!(matches!(result, Err(AuthenticateUserError::InvalidPasswordHash(_))));
+        assert!(matches!(
+            result,
+            Err(AuthenticateUserError::InvalidPasswordHash(_))
+        ));
     }
 }
