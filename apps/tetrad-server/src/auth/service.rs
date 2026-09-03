@@ -91,13 +91,13 @@ impl AuthService {
         Ok(self.get_user.execute_by_internal_id(internal_id).await?)
     }
 
-    pub(crate) async fn get_user_by_normalized_username(
+    pub(crate) async fn get_user_by_username(
         &self,
-        normalized_username: &str,
+        username: &str,
     ) -> Result<Option<User>, AuthError> {
         Ok(self
             .get_user
-            .execute_by_normalized_username(normalized_username)
+            .execute_by_username(username)
             .await?)
     }
 
@@ -178,13 +178,13 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn converts_get_user_by_normalized_username_repository_error_to_internal_auth_error() {
+    async fn converts_get_user_by_username_repository_error_to_internal_auth_error() {
         let repo = Arc::new(AuthRepositoryMock::failing(AuthRepositoryError::Database(
             sqlx::Error::PoolClosed,
         )));
         let service = AuthService::new(repo);
 
-        let result = service.get_user_by_normalized_username("username").await;
+        let result = service.get_user_by_username("username").await;
 
         assert!(matches!(result, Err(AuthError::Internal(_))));
     }

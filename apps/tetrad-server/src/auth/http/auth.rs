@@ -4,7 +4,7 @@ use crate::auth::{
     model::{CreateUserInput, Credentials},
 };
 
-use axum::{Form, Json, extract::State, http::StatusCode};
+use axum::{Form, Json, extract::{Path, State}, http::StatusCode};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize)]
@@ -69,4 +69,15 @@ pub(crate) async fn me(auth_session: AuthSession) -> Result<Json<UserDto>, AuthH
         .ok_or_else(|| AuthHttpError::unauthorized("authentication required"))?;
 
     Ok(Json(current_user.into()))
+}
+
+pub(crate) async fn get_user_by_username(
+    State(auth_service): State<AuthService>,
+    Path(username): Path<String>
+) -> Result<Json<UserDto>, AuthHttpError> {
+    let user = auth_service
+        .get_user_by_username(&username)
+        .await?
+        .ok_or_else(|| AuthHttpError::not_found("user not found"))?;
+    Ok(Json(user.into())) 
 }

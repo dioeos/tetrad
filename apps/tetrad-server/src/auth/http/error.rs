@@ -70,6 +70,16 @@ impl AuthHttpError {
             }
         }
     }
+
+    pub(super) fn not_found(message: &'static str) -> Self {
+        Self {
+            status: StatusCode::NOT_FOUND,
+            body: AuthErrorDto {
+                code: "not_found",
+                message
+            }
+        }
+    }
 }
 
 impl IntoResponse for AuthHttpError {

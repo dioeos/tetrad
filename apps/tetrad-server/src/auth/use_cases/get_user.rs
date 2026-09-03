@@ -4,7 +4,7 @@ use thiserror::Error;
 
 use crate::auth::{
     model::User,
-    repository::{AuthRepository, AuthRepositoryError},
+    repository::{AuthRepository, AuthRepositoryError}, use_cases::util::normalize_username,
 };
 
 #[derive(Debug, Error)]
@@ -34,13 +34,14 @@ impl GetUser {
         //       ensures that the `AuthRepositoryError` is converted to a `GetUserError::Repository`
     }
 
-    pub(in crate::auth) async fn execute_by_normalized_username(
+    pub(in crate::auth) async fn execute_by_username(
         &self,
-        normalized_username: &str,
+        username: &str,
     ) -> Result<Option<User>, GetUserError> {
+        let normalized_username = normalize_username(username);
         Ok(self
             .repository
-            .get_user_by_normalized_username(normalized_username)
+            .get_user_by_normalized_username(&normalized_username)
             .await?)
         //@NOTE: Does not transform Option<T> into Result<T, E>  with .ok_or(GetUserError::NotFound) in order to satisfy
         //       the expection of Result<Option<User>> in axum_login's AuthnBackend trait (`authenticate` fn).
@@ -136,7 +137,7 @@ mod tests {
         let get_user = GetUser::new(repo);
 
         let user = get_user
-            .execute_by_normalized_username("username")
+            .execute_by_username("username")
             .await
             .unwrap()
             .unwrap();
@@ -162,7 +163,7 @@ mod tests {
         let get_user = GetUser::new(repo);
 
         let user = get_user
-            .execute_by_normalized_username("username")
+            .execute_by_username("username")
             .await
             .unwrap();
         assert!(user.is_none());
@@ -184,7 +185,7 @@ mod tests {
         )));
         let get_user = GetUser::new(repo);
 
-        let result = get_user.execute_by_normalized_username("username").await;
+        let result = get_user.execute_by_username("username").await;
 
         assert!(matches!(result, Err(GetUserError::Repository(_))));
     }
