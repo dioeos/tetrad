@@ -9,9 +9,10 @@ pub(in crate::auth) struct NewUser {
     pub(in crate::auth) password_hash: String,
 }
 
-pub(in crate::auth) struct CreateUserInput {
-    pub(in crate::auth) username: String,
-    pub(in crate::auth) password: String,
+#[derive(Clone)]
+pub(crate) struct CreateUserInput {
+    pub(crate) username: String,
+    pub(crate) password: String,
 }
 
 #[derive(Clone)]

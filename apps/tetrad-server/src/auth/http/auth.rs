@@ -48,6 +48,11 @@ pub(crate) async fn create_user(
 type AuthSession = axum_login::AuthSession<TetradAuthBackend>;
 
 pub(crate) async fn login(mut auth_session: AuthSession, Form(creds): Form<Credentials>) -> Result<StatusCode, AuthHttpError> {
+    //@NOTE: The error seen by the handler is not of type `AuthError`,
+    //       but of type `axum_login::Error<TetradAuthBackend>, with its errors being
+    //       wrapped as `axum_login::Error::Backend(auth_error)` or
+    //       `axum_login::Error::Session(auth_error) and being converted. Each of 
+    //       these `axum_login::Error` variations are converted into an `AuthHttpError`
     let user = auth_session
         .authenticate(creds)
         .await?

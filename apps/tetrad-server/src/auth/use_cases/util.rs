@@ -31,3 +31,44 @@ pub(super) fn normalize_username(username: &str) -> String  {
     username.trim().to_ascii_lowercase()
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn validate_username_returns_invalid_username_when_too_short() {
+        let err = validate_username("me");
+        assert!(matches!(err, Err(CreateUserError::InvalidUsername)));
+    }
+
+    #[test]
+    fn validate_username_returns_invalid_username_when_too_long() {
+        let x = "a";
+        let long = x.repeat(33);
+        let err = validate_username(&long);
+        assert!(matches!(err, Err(CreateUserError::InvalidUsername)));
+    }
+
+    #[test]
+    fn validate_username_returns_invalid_username_when_not_all_ascii_alphanumeric_or_underscores_or_hyphens() {
+        let err1 = validate_username("user.name");
+        let err2 = validate_username("user name");
+        assert!(matches!(err1, Err(CreateUserError::InvalidUsername)));
+        assert!(matches!(err2, Err(CreateUserError::InvalidUsername)));
+    }
+
+    #[test]
+    fn validate_password_returns_invalid_when_too_short() {
+        let err = validate_password("a");
+        assert!(matches!(err, Err(CreateUserError::InvalidPassword)));
+    }
+
+    #[test]
+    fn validate_password_returns_invalid_when_too_long() {
+        let x = "a";
+        let long = x.repeat(257);
+        let err = validate_password(&long);
+        assert!(matches!(err, Err(CreateUserError::InvalidPassword)));
+    }
+}
+

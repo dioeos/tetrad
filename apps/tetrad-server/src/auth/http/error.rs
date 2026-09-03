@@ -2,7 +2,7 @@ use crate::auth::{AuthError, TetradAuthBackend};
 
 use axum::{
     Json,
-    http::{StatusCode, status},
+    http::{StatusCode},
     response::{IntoResponse, Response},
 };
 use serde::Serialize;
@@ -46,16 +46,6 @@ impl AuthHttpError {
             status: StatusCode::CONFLICT,
             body: AuthErrorDto {
                 code: "conflict",
-                message,
-            },
-        }
-    }
-
-    fn not_found(message: &'static str) -> Self {
-        Self {
-            status: StatusCode::NOT_FOUND,
-            body: AuthErrorDto {
-                code: "not_found",
                 message,
             },
         }
@@ -108,7 +98,6 @@ impl From<AuthError> for AuthHttpError {
                 AuthHttpError::bad_request("invalid password")
             }
             AuthError::UsernameAlreadyTaken => AuthHttpError::conflict("username is already taken"),
-            AuthError::UserNotFound => AuthHttpError::not_found("user not found"),
         }
     }
 }
