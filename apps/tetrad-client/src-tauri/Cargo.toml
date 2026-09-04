@@ -20,6 +20,8 @@ tauri-build = { version = "2", features = [] }
 
 [dependencies]
 tetrad-api-contract = { path = "../../../tetrad-api-contract" }
+async-trait.workspace = true
+torii-client = { git = "https://github.com/cmackenzie1/torii-rs", package = "torii-client" }
 serde.workspace = true
 serde_json.workspace = true
 uuid.workspace = true

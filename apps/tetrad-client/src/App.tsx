@@ -15,7 +15,7 @@ function App() {
   async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     try {
-      const result = register(email, password);
+      const result = await register(email, password);
       console.log("Registered:", result);
     } catch (err: unknown) {
       const apiError = err as ApiErrorResponse;
