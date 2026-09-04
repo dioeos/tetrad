@@ -11,6 +11,7 @@ use std::time::Duration;
 
 use axum::{Router, body::Body, http::{Request, Response}, routing::get};
 use sqlx::SqlitePool;
+use tetrad_api_types::prefixes;
 use torii::Torii;
 use torii_storage_seaorm::SeaORMStorage;
 use tower_http::trace::TraceLayer;
@@ -57,12 +58,10 @@ pub async fn build_app(config: Config) -> anyhow::Result<Router> {
 
     let state = AppState::new(db, config, torii, instance_service, profile_service);
 
-    let auth_routes = Router::new().merge(custom_torii_auth_router());
-
     Ok(Router::new()
         .route("/", get(|| async { "Hello, World!" }))
         .merge(instance_router())
-        .nest("/auth", auth_routes)
+        .merge(custom_torii_auth_router())
         .with_state(state)
         .layer(
             TraceLayer::new_for_http()

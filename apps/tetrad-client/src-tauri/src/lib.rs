@@ -1,5 +1,5 @@
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-use tetrad_api_types::{ApiErrorResponse, RegisterDto, RegisterRequest};
+use tetrad_api_types::{ApiErrorResponse, Endpoint, RegisterDto, RegisterEndpoint, RegisterRequest};
 
 const API_BASE_URL: &str = "http://localhost:8080";
 
@@ -13,7 +13,7 @@ async fn register(email: String, password: String) -> Result<RegisterDto, ApiErr
     let request = RegisterRequest { email, password };
 
     let response = reqwest::Client::new()
-        .post(format!("{API_BASE_URL}/auth/register"))
+        .post(format!("{API_BASE_URL}{}", RegisterEndpoint::CONTRACT.path))
         .json(&request)
         .send()
         .await
