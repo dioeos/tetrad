@@ -101,16 +101,37 @@ mod tests {
     use crate::instance::{InstanceRepository, repository::RepositoryError};
     use sqlx::SqlitePool;
 
-    #[sqlx::test(migrations = "./migrations")]
+    async fn create_instances_table(pool: &SqlitePool) {
+        sqlx::query(
+            r#"
+            CREATE TABLE instances (
+              singleton                 INTEGER PRIMARY KEY CHECK (singleton = 1),
+              id                        TEXT NOT NULL UNIQUE,
+              name                      TEXT NOT NULL,
+              setup_completed_at_ms     INTEGER,
+              created_at_ms             INTEGER NOT NULL
+            )
+            "#,
+        )
+        .execute(pool)
+        .await
+        .unwrap();
+    }
+
+    #[sqlx::test(migrations = false)]
     async fn get_returns_none_when_no_instance_exists(pool: SqlitePool) {
+        create_instances_table(&pool).await;
+
         let repo = SqliteInstanceRepository::new(pool);
         let result = repo.get().await.unwrap();
 
         assert!(result.is_none());
     }
 
-    #[sqlx::test(migrations = "./migrations")]
+    #[sqlx::test(migrations = false)]
     async fn ensure_exists_creates_instance(pool: SqlitePool) {
+        create_instances_table(&pool).await;
+
         let repo = SqliteInstanceRepository::new(pool.clone());
         let instance = repo.ensure_exists("test-instance").await.unwrap();
 
@@ -126,8 +147,10 @@ mod tests {
         assert_eq!(row_count, 1)
     }
 
-    #[sqlx::test(migrations = "./migrations")]
+    #[sqlx::test(migrations = false)]
     async fn ensure_exists_is_idempotent(pool: SqlitePool) {
+        create_instances_table(&pool).await;
+
         let repo = SqliteInstanceRepository::new(pool.clone());
 
         let first = repo.ensure_exists("first").await.unwrap();
@@ -144,8 +167,10 @@ mod tests {
         assert_eq!(row_count, 1)
     }
 
-    #[sqlx::test(migrations = "./migrations")]
+    #[sqlx::test(migrations = false)]
     async fn get_returns_ensured_instance(pool: SqlitePool) {
+        create_instances_table(&pool).await;
+
         let repo = SqliteInstanceRepository::new(pool);
         let ensured = repo.ensure_exists("tetrad").await.unwrap();
         let result = repo.get().await.unwrap().unwrap();
@@ -155,8 +180,10 @@ mod tests {
         assert_eq!(ensured.setup_completed_at_ms, result.setup_completed_at_ms)
     }
 
-    #[sqlx::test(migrations = "./migrations")]
+    #[sqlx::test(migrations = false)]
     async fn database_errors_are_wrapped_as_repository_errors(pool: SqlitePool) {
+        create_instances_table(&pool).await;
+
         sqlx::query("DROP TABLE instances")
             .execute(&pool)
             .await

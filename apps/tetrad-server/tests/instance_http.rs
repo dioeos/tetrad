@@ -5,13 +5,15 @@ use tetrad_server::build_app;
 
 mod common;
 
-use common::{response_body, test_config};
+use common::{response_body, test_config, test_database_url};
 
 const GET_INSTANCE_URL: &str = "/instance";
 
-#[sqlx::test(migrations = "./migrations")]
-async fn get_instance_http_endpoint_returns_initialized_instance(pool: SqlitePool) {
-    let app = build_app(pool.clone(), test_config()).await.unwrap();
+#[tokio::test]
+async fn get_instance_http_endpoint_returns_initialized_instance() {
+    let db_url = test_database_url();
+    let config = test_config(db_url.clone());
+    let app = build_app(config).await.unwrap();
 
     let server = TestServer::new(app);
 
@@ -29,6 +31,7 @@ async fn get_instance_http_endpoint_returns_initialized_instance(pool: SqlitePoo
 
     assert!(!id.is_empty());
 
+    let pool = SqlitePool::connect(&db_url).await.unwrap();
     let row_count: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM instances")
         .fetch_one(&pool)
         .await
@@ -37,11 +40,14 @@ async fn get_instance_http_endpoint_returns_initialized_instance(pool: SqlitePoo
     assert_eq!(row_count, 1);
 }
 
-#[sqlx::test(migrations = "./migrations")]
-async fn get_instance_http_endpoint_returns_404_when_no_instance(pool: SqlitePool) {
-    let app = build_app(pool.clone(), test_config()).await.unwrap();
-
+#[tokio::test]
+async fn get_instance_http_endpoint_returns_404_when_no_instance() {
+    let db_url = test_database_url();
+    let config = test_config(db_url.clone());
+    let app = build_app(config).await.unwrap();
     let server = TestServer::new(app);
+
+    let pool = SqlitePool::connect(&db_url).await.unwrap();
 
     sqlx::query("DELETE FROM instances")
         .execute(&pool)
@@ -57,13 +63,19 @@ async fn get_instance_http_endpoint_returns_404_when_no_instance(pool: SqlitePoo
     assert_eq!(body["message"], json!("instance not found"))
 }
 
-#[sqlx::test(migrations = "./migrations")]
-async fn get_instance_http_endpoint_returns_500_on_database_failure(pool: SqlitePool) {
-    let app = build_app(pool.clone(), test_config()).await.unwrap();
-
+#[tokio::test]
+async fn get_instance_http_endpoint_returns_500_on_database_failure() {
+    let db_url = test_database_url();
+    let config = test_config(db_url.clone());
+    let app = build_app(config).await.unwrap();
     let server = TestServer::new(app);
 
-    pool.close().await;
+    let pool = SqlitePool::connect(&db_url).await.unwrap();
+
+    sqlx::query("DROP TABLE instances")
+        .execute(&pool)
+        .await
+        .unwrap();
 
     let response = server.get(GET_INSTANCE_URL).await;
     let body = response_body(&response);

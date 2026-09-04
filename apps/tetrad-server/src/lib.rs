@@ -25,7 +25,17 @@ use crate::{
 
 pub use config::Config;
 
-pub async fn build_app(db: SqlitePool, config: Config) -> anyhow::Result<Router> {
+async fn initialize_database(database_url: &str) -> anyhow::Result<(SqlitePool, SeaORMStorage)> {
+    let storage = SeaORMStorage::connect(database_url).await?;
+    storage.migrate().await?;
+    let db: SqlitePool = database::connect(database_url).await?;
+    database::migrate(&db).await?;
+
+    Ok((db, storage))
+}
+
+pub async fn build_app(config: Config) -> anyhow::Result<Router> {
+    let (db, storage) = initialize_database(&config.database_url).await?;
     let instance_service: InstanceService = instance::create_service(db.clone());
     let profile_service: ProfileService = profile::create_service(db.clone());
 
@@ -38,9 +48,6 @@ pub async fn build_app(db: SqlitePool, config: Config) -> anyhow::Result<Router>
         name = current_instance.name,
         "instance initialized"
     );
-
-    let storage = SeaORMStorage::connect(&config.database_url).await?;
-    storage.migrate().await?;
 
     let repos = Arc::new(storage.into_repository_provider());
     let torii = Arc::new(Torii::new(repos));
@@ -74,16 +81,13 @@ pub async fn run(config: Config) -> anyhow::Result<()> {
         "tetrad server configurations"
     );
 
-    let db: SqlitePool = database::connect(&config.database_url).await?;
-    database::migrate(&db).await?;
-
     let listener = tokio::net::TcpListener::bind(&config.bind_address)
         .await
         .unwrap();
 
     info!("server listening on http://{}", &config.bind_address);
 
-    let app = build_app(db, config).await?;
+    let app = build_app(config).await?;
 
     axum::serve(listener, app).await.unwrap();
 
