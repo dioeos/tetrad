@@ -15,6 +15,7 @@ use axum::{
     routing::get,
 };
 use torii::Torii;
+use torii_axum::{CookieConfig, LinkConfig};
 use tower_http::trace::TraceLayer;
 use tracing::{Span, debug, error, info, warn};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
@@ -43,11 +44,18 @@ pub async fn build_app(config: Config) -> anyhow::Result<Router> {
     let repos = Arc::new(storage.into_repository_provider());
     let torii = Arc::new(Torii::new(repos));
 
+    let auth_routes = torii_axum::routes(torii.clone())
+        .with_cookie_config(CookieConfig::development())
+        .with_link_config(LinkConfig::new(&config.base_url))
+        .build()
+        .with_state(());
+
     let state = AppState::new(db, config, torii, instance_service);
 
     Ok(Router::new()
         .route("/", get(|| async { "Hello, World!" }))
         .merge(instance_router())
+        .nest("/auth", auth_routes)
         .with_state(state)
         .layer(
             TraceLayer::new_for_http()
