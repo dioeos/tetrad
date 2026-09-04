@@ -7,13 +7,14 @@ mod state;
 mod torii_tetrad;
 
 use std::sync::Arc;
+use std::time::Duration;
 
-use axum::{Router, routing::get};
+use axum::{Router, body::Body, http::{Request, Response}, routing::get};
 use sqlx::SqlitePool;
 use torii::Torii;
 use torii_storage_seaorm::SeaORMStorage;
 use tower_http::trace::TraceLayer;
-use tracing::info;
+use tracing::{Span, debug, info, warn, error};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 use crate::{
@@ -63,7 +64,41 @@ pub async fn build_app(config: Config) -> anyhow::Result<Router> {
         .merge(instance_router())
         .nest("/auth", auth_routes)
         .with_state(state)
-        .layer(TraceLayer::new_for_http()))
+        .layer(
+            TraceLayer::new_for_http()
+                .on_request(|request: &Request<Body>, _span: &Span| {
+                    debug!(
+                        method = %request.method(),
+                        uri = %request.uri(),
+                        "request started"
+                    );
+                })
+                .on_response(
+                    |response: &Response<Body>, latency: Duration, _span: &Span| {
+                        let status = response.status();
+
+                        if status.is_server_error() {
+                            error!(
+                                status = %status,
+                                latency_ms = latency.as_millis(),
+                                "request failed"
+                            );
+                        } else if status.is_client_error() {
+                            warn!(
+                                status = %status,
+                                latency_ms = latency.as_millis(),
+                                "request rejected"
+                            );
+                        } else {
+                            info!(
+                                status = %status,
+                                latency_ms = latency.as_millis(),
+                                "request completed"
+                            );
+                        }
+                    },
+                ),
+        ))
 }
 
 pub async fn run(config: Config) -> anyhow::Result<()> {
@@ -72,7 +107,11 @@ pub async fn run(config: Config) -> anyhow::Result<()> {
             tracing_subscriber::EnvFilter::try_from_default_env()
                 .unwrap_or_else(|_| "tetrad_server=debug,tower_http=debug".into()),
         )
-        .with(tracing_subscriber::fmt::layer())
+        .with(
+            tracing_subscriber::fmt::layer()
+                .compact()
+                .with_target(false),
+        )
         .init();
 
     info!(
