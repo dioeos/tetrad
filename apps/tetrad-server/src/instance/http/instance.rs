@@ -1,6 +1,6 @@
 use crate::{
     error::HttpError,
-    instance::{Instance, InstanceService}
+    instance::{Instance, InstanceService},
 };
 
 use axum::{Json, extract::State};

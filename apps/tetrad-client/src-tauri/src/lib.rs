@@ -1,5 +1,7 @@
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-use tetrad_api_contract::{ApiErrorResponse, Endpoint, RegisterDto, RegisterEndpoint, RegisterRequest};
+use tetrad_api_contract::{
+    ApiErrorResponse, Endpoint, RegisterDto, RegisterEndpoint, RegisterRequest,
+};
 
 const API_BASE_URL: &str = "http://localhost:8080";
 

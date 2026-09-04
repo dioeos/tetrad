@@ -1,5 +1,5 @@
-use crate::instance::InstanceError;
 use crate::error::HttpError;
+use crate::instance::InstanceError;
 use tracing::error;
 
 impl From<InstanceError> for HttpError {

@@ -1,11 +1,10 @@
 use axum::{Json, http::StatusCode, response::IntoResponse};
 use tetrad_api_contract::ApiErrorResponse;
 
-
 #[derive(Debug)]
 pub(crate) struct HttpError {
     status: StatusCode,
-    body: ApiErrorResponse
+    body: ApiErrorResponse,
 }
 
 impl IntoResponse for HttpError {
@@ -20,8 +19,8 @@ impl HttpError {
             status: StatusCode::BAD_REQUEST,
             body: ApiErrorResponse {
                 code: "bad_request".to_owned(),
-                message: message.into()
-            }
+                message: message.into(),
+            },
         }
     }
 
@@ -30,8 +29,8 @@ impl HttpError {
             status: StatusCode::NOT_FOUND,
             body: ApiErrorResponse {
                 code: "not_found".to_owned(),
-                message: message.into()
-            }
+                message: message.into(),
+            },
         }
     }
 
@@ -40,8 +39,8 @@ impl HttpError {
             status: StatusCode::INTERNAL_SERVER_ERROR,
             body: ApiErrorResponse {
                 code: "internal_server_error".to_owned(),
-                message: message.into()
-            }
+                message: message.into(),
+            },
         }
     }
 }

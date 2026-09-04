@@ -1,47 +1,34 @@
 mod common;
 mod config;
 mod database;
-mod instance;
-mod profile;
-mod state;
-mod torii_tetrad;
 mod error;
+mod instance;
+mod state;
 
 use std::sync::Arc;
 use std::time::Duration;
 
-use axum::{Router, body::Body, http::{Request, Response}, routing::get};
-use sqlx::SqlitePool;
+use axum::{
+    Router,
+    body::Body,
+    http::{Request, Response},
+    routing::get,
+};
 use torii::Torii;
-use torii_storage_seaorm::SeaORMStorage;
 use tower_http::trace::TraceLayer;
-use tracing::{Span, debug, info, warn, error};
+use tracing::{Span, debug, error, info, warn};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 use crate::{
     instance::{Instance, InstanceService, router as instance_router},
-    profile::ProfileService,
     state::AppState,
-    torii_tetrad::custom_torii_auth_router,
 };
 
 pub use config::Config;
 
-async fn initialize_database(database_url: &str) -> anyhow::Result<(SqlitePool, SeaORMStorage)> {
-    let db: SqlitePool = database::connect(database_url).await?;
-
-    let storage = SeaORMStorage::connect(database_url).await?;
-    storage.migrate().await?;
-
-    database::migrate(&db).await?;
-
-    Ok((db, storage))
-}
-
 pub async fn build_app(config: Config) -> anyhow::Result<Router> {
-    let (db, storage) = initialize_database(&config.database_url).await?;
+    let (db, storage) = database::initialize(&config.database_url).await?;
     let instance_service: InstanceService = instance::create_service(db.clone());
-    let profile_service: ProfileService = profile::create_service(db.clone());
 
     let current_instance: Instance = instance_service
         .ensure_exists(&config.instance_name)
@@ -56,12 +43,11 @@ pub async fn build_app(config: Config) -> anyhow::Result<Router> {
     let repos = Arc::new(storage.into_repository_provider());
     let torii = Arc::new(Torii::new(repos));
 
-    let state = AppState::new(db, config, torii, instance_service, profile_service);
+    let state = AppState::new(db, config, torii, instance_service);
 
     Ok(Router::new()
         .route("/", get(|| async { "Hello, World!" }))
         .merge(instance_router())
-        .merge(custom_torii_auth_router())
         .with_state(state)
         .layer(
             TraceLayer::new_for_http()

@@ -1,6 +1,5 @@
-mod register;
 mod login;
+mod register;
 
-
+pub use login::{LoginRequest, LoginUserDto};
 pub use register::{RegisterDto, RegisterRequest, RegisterUserResponse};
-pub use login::{LoginUserDto, LoginRequest};

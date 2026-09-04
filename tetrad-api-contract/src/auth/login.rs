@@ -11,5 +11,5 @@ pub struct LoginRequest {
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
 #[ts(export)]
 pub struct LoginUserDto {
-    pub token: String
+    pub token: String,
 }
