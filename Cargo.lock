@@ -5739,6 +5739,8 @@ dependencies = [
  "tauri",
  "tauri-build",
  "tauri-plugin-opener",
+ "tetrad-api-types",
+ "uuid",
 ]
 
 [[package]]
@@ -5753,6 +5755,7 @@ dependencies = [
  "serde",
  "serde_json",
  "sqlx",
+ "tetrad-api-types",
  "thiserror 2.0.20",
  "time",
  "tokio",

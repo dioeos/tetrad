@@ -26,9 +26,11 @@ use crate::{
 pub use config::Config;
 
 async fn initialize_database(database_url: &str) -> anyhow::Result<(SqlitePool, SeaORMStorage)> {
+    let db: SqlitePool = database::connect(database_url).await?;
+
     let storage = SeaORMStorage::connect(database_url).await?;
     storage.migrate().await?;
-    let db: SqlitePool = database::connect(database_url).await?;
+
     database::migrate(&db).await?;
 
     Ok((db, storage))

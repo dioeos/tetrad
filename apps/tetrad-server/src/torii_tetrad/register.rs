@@ -1,40 +1,16 @@
 use axum::{Json, extract::State, http::StatusCode, response::IntoResponse};
-use serde::{Deserialize, Serialize};
 use torii_axum::ConnectionInfo;
 use tracing::{error, warn};
 use uuid::Uuid;
+use tetrad_api_types::{RegisterRequest, RegisterDto, RegisterUserResponse, ApiErrorResponse};
 
 use crate::{profile::NewProfile, state::AppState};
 
-#[derive(Deserialize)]
-pub(super) struct RegisterRequest {
-    email: String,
-    password: String,
-}
-
-#[derive(Serialize)]
-struct RegisterUserResponse {
-    torii_user_id: String,
-    external_id: String,
-    email: String,
-}
-
-#[derive(Serialize)]
-pub(super) struct RegisterDto {
-    token: String,
-    user: RegisterUserResponse,
-}
-
-#[derive(Debug, Serialize)]
-pub(super) struct RegisterErrorDto {
-    code: &'static str,
-    message: &'static str,
-}
 
 #[derive(Debug)]
 pub(super) struct RegisterHttpError {
     status: StatusCode,
-    body: RegisterErrorDto,
+    body: ApiErrorResponse,
 }
 
 impl IntoResponse for RegisterHttpError {
@@ -47,9 +23,9 @@ impl RegisterHttpError {
     fn bad_request(message: &'static str) -> Self {
         Self {
             status: StatusCode::BAD_REQUEST,
-            body: RegisterErrorDto {
-                code: "bad_request",
-                message,
+            body: ApiErrorResponse {
+                code: "bad_request".to_owned(),
+                message: message.into(),
             },
         }
     }
@@ -57,9 +33,9 @@ impl RegisterHttpError {
     fn internal_server_error(message: &'static str) -> Self {
         Self {
             status: StatusCode::INTERNAL_SERVER_ERROR,
-            body: RegisterErrorDto {
-                code: "internal_server_error",
-                message,
+            body: ApiErrorResponse {
+                code: "internal_server_error".to_owned(),
+                message: message.into(),
             },
         }
     }

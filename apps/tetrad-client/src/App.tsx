@@ -3,12 +3,15 @@ import { invoke } from "@tauri-apps/api/core";
 import "./App.css";
 
 function App() {
-  const [greetMsg, setGreetMsg] = useState("");
-  const [name, setName] = useState("");
+  const [password, setPassword] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
 
-  async function greet() {
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-    setGreetMsg(await invoke("greet", { name }));
+  // async function greet() {
+  //   // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
+  //   setGreetMsg(await invoke("greet", { name }));
+  // }
+  async function register(email: string, password: string) {
+    await invoke("register", { email, password });
   }
 
   return (
@@ -19,17 +22,21 @@ function App() {
         className="row"
         onSubmit={(e) => {
           e.preventDefault();
-          greet();
+          register(email, password);
         }}
       >
         <input
-          id="greet-input"
-          onChange={(e) => setName(e.currentTarget.value)}
-          placeholder="Enter a name..."
+          id="email-input"
+          onChange={(e) => setEmail(e.currentTarget.value)}
+          placeholder="Email"
         />
-        <button type="submit">Greet</button>
+        <input
+          id="password-input"
+          onChange={(e) => setPassword(e.currentTarget.value)}
+          placeholder="Password"
+        />
+        <button type="submit">Register</button>
       </form>
-      <p>{greetMsg}</p>
     </main>
   );
 }

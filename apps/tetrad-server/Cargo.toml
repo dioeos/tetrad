@@ -5,6 +5,7 @@ edition.workspace = true
 rust-version.workspace = true
 
 [dependencies]
+tetrad-api-types = { path = "../../tetrad-api-types" }
 serde.workspace = true
 serde_json.workspace = true
 uuid.workspace = true
