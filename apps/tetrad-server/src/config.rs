@@ -25,7 +25,7 @@ impl Config {
     }
     pub fn from_environment() -> anyhow::Result<Self> {
         let database_url = std::env::var("DATABASE_URL")
-            .unwrap_or_else(|_| "sqlite://data/tetrad.sqlite3".to_owned());
+            .unwrap_or_else(|_| "sqlite://apps/tetrad-server/data/tetrad.sqlite3".to_owned());
 
         let bind_address = std::env::var("TETRAD_BIND_ADDRESS")
             .unwrap_or_else(|_| "0.0.0.0:8080".to_owned())
