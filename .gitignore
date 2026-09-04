@@ -10,3 +10,18 @@ apps/tetrad-server/data/*.db
 apps/tetrad-server/data/*.db-*
 apps/tetrad-server/data/*.sqlite3-*
 apps/tetrad-server/cookies.txt
+
+# TAURI CLIENT
+apps/tetrad-client/logs
+
+apps/tetrad-client/*.log
+apps/tetrad-client/npm-debug.log*
+apps/tetrad-client/yarn-debug.log*
+apps/tetrad-client/yarn-error.log*
+apps/tetrad-client/pnpm-debug.log*
+apps/tetrad-client/lerna-debug.log*
+
+apps/tetrad-client/node_modules
+apps/tetrad-client/dist
+apps/tetrad-client/dist-ssr
+apps/tetrad-client/*.local
