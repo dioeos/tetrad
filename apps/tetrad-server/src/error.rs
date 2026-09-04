@@ -14,16 +14,6 @@ impl IntoResponse for HttpError {
 }
 
 impl HttpError {
-    pub(crate) fn bad_request(message: &'static str) -> Self {
-        Self {
-            status: StatusCode::BAD_REQUEST,
-            body: ApiErrorResponse {
-                code: "bad_request".to_owned(),
-                message: message.into(),
-            },
-        }
-    }
-
     pub(crate) fn not_found(message: &'static str) -> Self {
         Self {
             status: StatusCode::NOT_FOUND,
