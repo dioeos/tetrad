@@ -1,6 +1,7 @@
 .direnv
 .env
 result
+target/
 
 # SERVER
 apps/tetrad-server/target

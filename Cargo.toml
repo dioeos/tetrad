@@ -1,0 +1,16 @@
+[workspace]
+resolver = "3"
+members = [
+    "apps/tetrad-server",
+    "apps/tetrad-client/src-tauri",
+    "tetrad-api-types"
+]
+
+[workspace.dependencies]
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0"
+uuid = { version = "1", features = ["serde", "v4", "v7"] }
+
+[workspace.package]
+edition = "2024"
+rust-version = "1.95"
