@@ -1,5 +1,5 @@
 use axum::{Router, routing::post};
-use tetrad_api_types::{Endpoint, RegisterEndpoint};
+use tetrad_api_contract::{Endpoint, RegisterEndpoint};
 
 use crate::state::AppState;
 

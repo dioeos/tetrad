@@ -5730,7 +5730,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "tetrad-api-types"
+name = "tetrad-api-contract"
 version = "0.1.0"
 dependencies = [
  "serde",
@@ -5749,7 +5749,7 @@ dependencies = [
  "tauri",
  "tauri-build",
  "tauri-plugin-opener",
- "tetrad-api-types",
+ "tetrad-api-contract",
  "uuid",
 ]
 
@@ -5765,7 +5765,7 @@ dependencies = [
  "serde",
  "serde_json",
  "sqlx",
- "tetrad-api-types",
+ "tetrad-api-contract",
  "thiserror 2.0.20",
  "time",
  "tokio",

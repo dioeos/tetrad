@@ -11,7 +11,6 @@ use std::time::Duration;
 
 use axum::{Router, body::Body, http::{Request, Response}, routing::get};
 use sqlx::SqlitePool;
-use tetrad_api_types::prefixes;
 use torii::Torii;
 use torii_storage_seaorm::SeaORMStorage;
 use tower_http::trace::TraceLayer;
