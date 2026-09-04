@@ -1,17 +1,27 @@
 import { useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import "./App.css";
+import { RegisterDto } from "./bindings/RegisterDto";
+import { ApiErrorResponse } from "./bindings/ApiErrorResponse";
 
 function App() {
   const [password, setPassword] = useState<string>("");
   const [email, setEmail] = useState<string>("");
 
-  // async function greet() {
-  //   // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-  //   setGreetMsg(await invoke("greet", { name }));
-  // }
   async function register(email: string, password: string) {
-    await invoke("register", { email, password });
+    return await invoke<RegisterDto>("register", { email, password });
+  }
+
+  async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
+    e.preventDefault();
+    try {
+      const result = register(email, password);
+      console.log("Registered:", result);
+    } catch (err: unknown) {
+      const apiError = err as ApiErrorResponse;
+      console.log("Registration failed:", apiError);
+      console.error(apiError.code, apiError.message);
+    }
   }
 
   return (
@@ -20,10 +30,7 @@ function App() {
 
       <form
         className="row"
-        onSubmit={(e) => {
-          e.preventDefault();
-          register(email, password);
-        }}
+        onSubmit={handleSubmit}
       >
         <input
           id="email-input"
