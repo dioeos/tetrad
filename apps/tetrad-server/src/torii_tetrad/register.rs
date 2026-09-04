@@ -1,11 +1,10 @@
 use axum::{Json, extract::State, http::StatusCode, response::IntoResponse};
+use tetrad_api_types::{ApiErrorResponse, RegisterDto, RegisterRequest, RegisterUserResponse};
 use torii_axum::ConnectionInfo;
 use tracing::{error, warn};
 use uuid::Uuid;
-use tetrad_api_types::{RegisterRequest, RegisterDto, RegisterUserResponse, ApiErrorResponse};
 
 use crate::{profile::NewProfile, state::AppState};
-
 
 #[derive(Debug)]
 pub(super) struct RegisterHttpError {

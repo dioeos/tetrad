@@ -1,5 +1,5 @@
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-use tetrad_api_types::{ApiErrorResponse, RegisterRequest, RegisterDto};
+use tetrad_api_types::{ApiErrorResponse, RegisterDto, RegisterRequest};
 
 const API_BASE_URL: &str = "http://localhost:8080";
 
@@ -30,7 +30,7 @@ async fn register(email: String, password: String) -> Result<RegisterDto, ApiErr
             .await
             .map_err(|_| ApiErrorResponse {
                 code: "client_error".to_owned(),
-                message: "server returned an unreadable error response".to_owned()
+                message: "server returned an unreadable error response".to_owned(),
             })?);
     }
 
@@ -39,7 +39,7 @@ async fn register(email: String, password: String) -> Result<RegisterDto, ApiErr
         .await
         .map_err(|_| ApiErrorResponse {
             code: "client_error".to_owned(),
-            message: "server returned an unreadable success response".to_owned()
+            message: "server returned an unreadable success response".to_owned(),
         })
 }
 

@@ -1,3 +1,3 @@
 mod auth;
 
-pub use auth::{ApiErrorResponse, RegisterRequest, RegisterDto, RegisterUserResponse};
+pub use auth::{ApiErrorResponse, RegisterDto, RegisterRequest, RegisterUserResponse};

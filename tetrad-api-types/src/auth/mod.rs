@@ -1,3 +1,3 @@
 mod register;
 
-pub use register::{ApiErrorResponse, RegisterRequest, RegisterDto, RegisterUserResponse};
+pub use register::{ApiErrorResponse, RegisterDto, RegisterRequest, RegisterUserResponse};
