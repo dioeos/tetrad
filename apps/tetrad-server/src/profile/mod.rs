@@ -10,8 +10,8 @@ use repository::ProfileRepository;
 use sqlite::SqliteProfileRepository;
 use sqlx::SqlitePool;
 
-pub(crate) use model::{NewProfile};
-pub(crate) use service::{ProfileService};
+pub(crate) use model::NewProfile;
+pub(crate) use service::ProfileService;
 
 pub(crate) fn create_service(db: SqlitePool) -> ProfileService {
     let repository: Arc<dyn ProfileRepository> = Arc::new(SqliteProfileRepository::new(db));
