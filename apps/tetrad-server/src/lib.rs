@@ -1,9 +1,3 @@
-// @NOTE: Custom auth implementation that is no longer used
-//        due to the integration of `torii`. However, the module is
-//        still present primarily for reference and due to `torii`
-//        beingin its early stages
-// mod auth;
-
 mod common;
 mod config;
 mod database;
@@ -24,9 +18,9 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 use crate::{
     instance::{Instance, InstanceService, router as instance_router},
-    torii_tetrad::custom_torii_auth_router,
     profile::ProfileService,
     state::AppState,
+    torii_tetrad::custom_torii_auth_router,
 };
 
 pub use config::Config;

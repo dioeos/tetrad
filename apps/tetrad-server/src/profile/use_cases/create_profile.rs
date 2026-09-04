@@ -30,7 +30,7 @@ impl CreateProfile {
 
     pub(in crate::profile) async fn execute(
         &self,
-        new_profile: NewProfile
+        new_profile: NewProfile,
     ) -> Result<Profile, CreateProfileError> {
         Ok(self.repository.create_profile(new_profile).await?)
     }

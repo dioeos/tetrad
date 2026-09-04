@@ -16,7 +16,7 @@ pub(crate) struct AppState {
     pub(crate) _config: Arc<Config>,
     pub(crate) torii: Arc<AppTorii>,
     pub(crate) instance_service: InstanceService,
-    pub(crate) profile_service: ProfileService
+    pub(crate) profile_service: ProfileService,
 }
 
 impl AppState {
@@ -25,14 +25,14 @@ impl AppState {
         config: Config,
         torii: Arc<AppTorii>,
         instance_service: InstanceService,
-        profile_service: ProfileService
+        profile_service: ProfileService,
     ) -> Self {
         Self {
             _db: db,
             _config: Arc::new(config),
             torii,
             instance_service,
-            profile_service
+            profile_service,
         }
     }
 }

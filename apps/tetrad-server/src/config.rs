@@ -35,8 +35,8 @@ impl Config {
         let instance_name =
             std::env::var("TETRAD_INSTANCE_NAME").unwrap_or_else(|_| "tetrad".to_owned());
 
-        let base_url = std::env::var("TETRAD_BASE_URL")
-            .unwrap_or_else(|_| "http://localhost:8080".to_owned());
+        let base_url =
+            std::env::var("TETRAD_BASE_URL").unwrap_or_else(|_| "http://localhost:8080".to_owned());
 
         Ok(Self {
             database_url,

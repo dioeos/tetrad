@@ -2,7 +2,11 @@ use std::{error::Error, sync::Arc};
 
 use thiserror::Error;
 
-use super::{model::{NewProfile, Profile}, repository::{ProfileRepository}, use_cases::{CreateProfile, CreateProfileError}};
+use super::{
+    model::{NewProfile, Profile},
+    repository::ProfileRepository,
+    use_cases::{CreateProfile, CreateProfileError},
+};
 
 #[derive(Debug, Error)]
 pub(crate) enum ProfileError {
@@ -18,17 +22,20 @@ impl From<CreateProfileError> for ProfileError {
 
 #[derive(Clone)]
 pub(crate) struct ProfileService {
-    create_profile: CreateProfile
+    create_profile: CreateProfile,
 }
 
 impl ProfileService {
     pub(super) fn new(repository: Arc<dyn ProfileRepository>) -> Self {
         Self {
-            create_profile: CreateProfile::new(repository)
+            create_profile: CreateProfile::new(repository),
         }
     }
 
-    pub(crate) async fn create_profile(&self, new_profile: NewProfile) -> Result<Profile, ProfileError> {
+    pub(crate) async fn create_profile(
+        &self,
+        new_profile: NewProfile,
+    ) -> Result<Profile, ProfileError> {
         Ok(self.create_profile.execute(new_profile).await?)
     }
 }

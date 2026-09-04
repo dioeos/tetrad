@@ -6,7 +6,7 @@ use uuid::Uuid;
 use crate::common::time;
 
 use super::{
-    model::{Profile, NewProfile},
+    model::{NewProfile, Profile},
     repository::{ProfileRepository, ProfileRepositoryError},
 };
 
@@ -38,10 +38,13 @@ impl SqliteProfileRepository {
 
 #[async_trait]
 impl ProfileRepository for SqliteProfileRepository {
-    async fn create_profile(&self, new_profile: NewProfile) -> Result<Profile, ProfileRepositoryError> {
+    async fn create_profile(
+        &self,
+        new_profile: NewProfile,
+    ) -> Result<Profile, ProfileRepositoryError> {
         let created_at_ms = time::now_ms();
         let mut transaction = self.db.begin().await?;
-        
+
         let result = sqlx::query(
             r#"
             INSERT INTO user_profiles (
@@ -51,7 +54,7 @@ impl ProfileRepository for SqliteProfileRepository {
                 updated_at_ms
             )
             VALUES (?, ?, ?, ?)
-            "#
+            "#,
         )
         .bind(new_profile.torii_user_id.to_string())
         .bind(new_profile.external_id.to_string())
@@ -69,7 +72,7 @@ impl ProfileRepository for SqliteProfileRepository {
                 external_id
             FROM user_profiles
             WHERE id = ?
-            "#
+            "#,
         )
         .bind(internal_id)
         .fetch_one(&mut *transaction)
