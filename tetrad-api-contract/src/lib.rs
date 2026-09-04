@@ -1,18 +1,17 @@
 //references: https://github.com/cmackenzie1/torii-rs/blob/main/torii-client/src/lib.rs
 
 mod auth;
+mod error;
 
-pub use auth::{ApiErrorResponse, RegisterDto, RegisterRequest, RegisterUserResponse};
+pub use auth::{LoginRequest, LoginUserDto, RegisterDto, RegisterRequest, RegisterUserResponse};
+pub use error::ApiErrorResponse;
 
 use serde::{Serialize, de::DeserializeOwned};
-
-pub mod prefixes {
-    pub const AUTH: &str = "/auth";
-}
 
 pub mod path {
     pub mod auth {
         pub const REGISTER: &str = "/auth/register";
+        pub const LOGIN: &str = "/auth/login";
     }
 }
 
@@ -77,4 +76,12 @@ define_endpoint!(
     path::auth::REGISTER,
     RegisterRequest,
     RegisterDto
+);
+
+define_endpoint!(
+    LoginEndpoint,
+    Method::Post,
+    path::auth::LOGIN,
+    LoginRequest,
+    LoginUserDto
 );

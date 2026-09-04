@@ -22,10 +22,3 @@ pub struct RegisterDto {
     pub token: String,
     pub user: RegisterUserResponse,
 }
-
-#[derive(Debug, Clone, Serialize, Deserialize, TS)]
-#[ts(export)]
-pub struct ApiErrorResponse {
-    pub code: String,
-    pub message: String,
-}

@@ -5,6 +5,7 @@ mod instance;
 mod profile;
 mod state;
 mod torii_tetrad;
+mod error;
 
 use std::sync::Arc;
 use std::time::Duration;

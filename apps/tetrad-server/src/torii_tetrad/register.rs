@@ -1,50 +1,17 @@
-use axum::{Json, extract::State, http::StatusCode, response::IntoResponse};
-use tetrad_api_contract::{ApiErrorResponse, RegisterDto, RegisterRequest, RegisterUserResponse};
+use axum::{Json, extract::State};
+use tetrad_api_contract::{RegisterDto, RegisterRequest, RegisterUserResponse};
 use torii_axum::ConnectionInfo;
 use tracing::{error, warn};
 use uuid::Uuid;
 
 use crate::{profile::NewProfile, state::AppState};
-
-#[derive(Debug)]
-pub(super) struct RegisterHttpError {
-    status: StatusCode,
-    body: ApiErrorResponse,
-}
-
-impl IntoResponse for RegisterHttpError {
-    fn into_response(self) -> axum::response::Response {
-        (self.status, Json(self.body)).into_response()
-    }
-}
-
-impl RegisterHttpError {
-    fn bad_request(message: &'static str) -> Self {
-        Self {
-            status: StatusCode::BAD_REQUEST,
-            body: ApiErrorResponse {
-                code: "bad_request".to_owned(),
-                message: message.into(),
-            },
-        }
-    }
-
-    fn internal_server_error(message: &'static str) -> Self {
-        Self {
-            status: StatusCode::INTERNAL_SERVER_ERROR,
-            body: ApiErrorResponse {
-                code: "internal_server_error".to_owned(),
-                message: message.into(),
-            },
-        }
-    }
-}
+use crate::error::HttpError;
 
 pub(super) async fn register_handler(
     State(state): State<AppState>,
     connection_info: ConnectionInfo,
     Json(request): Json<RegisterRequest>,
-) -> Result<Json<RegisterDto>, RegisterHttpError> {
+) -> Result<Json<RegisterDto>, HttpError> {
     let user = state
         .torii
         .password()
@@ -52,7 +19,7 @@ pub(super) async fn register_handler(
         .await
         .map_err(|error| {
             warn!(?error, "registration failed");
-            RegisterHttpError::bad_request("registration failed")
+            HttpError::bad_request("registration failed")
         })?;
 
     let external_id = Uuid::now_v7();
@@ -68,7 +35,7 @@ pub(super) async fn register_handler(
         .await
         .map_err(|error| {
             error!(?error, "profile creation failed");
-            RegisterHttpError::internal_server_error(
+            HttpError::internal_server_error(
                 "an unexpected error occurred creating profile",
             )
         })?;
@@ -85,7 +52,7 @@ pub(super) async fn register_handler(
         .await
         .map_err(|error| {
             error!(?error, "session creation failed");
-            RegisterHttpError::internal_server_error(
+            HttpError::internal_server_error(
                 "an unexpected error occurred creating session",
             )
         })?;
