@@ -20,9 +20,9 @@ time = "0.3.55"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "std", "fmt"] }
 tower-http = { version = "0.7.0", features = ["trace"] }
 thiserror = "2.0.20"
-torii-axum = { version = "0.5.2", features = ["password"] }
-torii = { version = "0.5.3", features = ["sqlite", "password"] }
-torii-storage-sqlite = "0.5.2"
+torii = { git = "https://github.com/cmackenzie1/torii-rs", rev = "52d23111bf2b39dadbf02c4fe1b05ef9bf7b11d3", features = ["sqlite", "password"] }
+torii-axum = { git = "https://github.com/cmackenzie1/torii-rs", rev = "52d23111bf2b39dadbf02c4fe1b05ef9bf7b11d3", features = ["password"] }
+torii-storage-sqlite =  { git = "https://github.com/cmackenzie1/torii-rs", rev = "52d23111bf2b39dadbf02c4fe1b05ef9bf7b11d3" }
 
 [dev-dependencies]
 axum-test = "21.1.0"

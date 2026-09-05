@@ -317,14 +317,15 @@ dependencies = [
 
 [[package]]
 name = "axum-extra"
-version = "0.10.3"
+version = "0.12.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9963ff19f40c6102c76756ef0a46004c0d58957d87259fc9208ff8441c12ab96"
+checksum = "be44683b41ccb9ab2d23a5230015c9c3c55be97a25e4428366de8873103f7970"
 dependencies = [
  "axum",
  "axum-core",
  "bytes",
  "cookie",
+ "futures-core",
  "futures-util",
  "headers",
  "http",
@@ -332,8 +333,6 @@ dependencies = [
  "http-body-util",
  "mime",
  "pin-project-lite",
- "rustversion",
- "serde_core",
  "tower-layer",
  "tower-service",
  "tracing",
@@ -5558,14 +5557,15 @@ checksum = "7d56353a2a665ad0f41a421187180aab746c8c325620617ad883a99a1cbe66d2"
 [[package]]
 name = "torii"
 version = "0.5.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "977df4559aa26c3605e7a3b4e498b69932de182ed6a38bd5ea675307d81cdf3f"
+source = "git+https://github.com/cmackenzie1/torii-rs?rev=52d23111bf2b39dadbf02c4fe1b05ef9bf7b11d3#52d23111bf2b39dadbf02c4fe1b05ef9bf7b11d3"
 dependencies = [
  "chrono",
  "serde",
  "serde_json",
+ "sqlx",
  "thiserror 2.0.20",
- "torii-core 0.5.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "torii-core",
+ "torii-services",
  "torii-storage-sqlite",
  "tracing",
 ]
@@ -5573,18 +5573,19 @@ dependencies = [
 [[package]]
 name = "torii-axum"
 version = "0.5.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "911cd0c9ae473e4ec57662732245df79b8d9afa7d0c4a46d3c8c56f317355a0e"
+source = "git+https://github.com/cmackenzie1/torii-rs?rev=52d23111bf2b39dadbf02c4fe1b05ef9bf7b11d3#52d23111bf2b39dadbf02c4fe1b05ef9bf7b11d3"
 dependencies = [
  "axum",
  "axum-extra",
  "chrono",
+ "cookie",
  "serde",
  "serde_json",
  "thiserror 2.0.20",
  "tokio",
  "torii",
- "torii-core 0.5.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "torii-client",
+ "torii-core",
  "tower",
  "tracing",
 ]
@@ -5592,42 +5593,18 @@ dependencies = [
 [[package]]
 name = "torii-client"
 version = "0.5.2"
-source = "git+https://github.com/cmackenzie1/torii-rs#52d23111bf2b39dadbf02c4fe1b05ef9bf7b11d3"
+source = "git+https://github.com/cmackenzie1/torii-rs?rev=52d23111bf2b39dadbf02c4fe1b05ef9bf7b11d3#52d23111bf2b39dadbf02c4fe1b05ef9bf7b11d3"
 dependencies = [
  "async-trait",
  "chrono",
  "serde",
- "torii-core 0.5.2 (git+https://github.com/cmackenzie1/torii-rs)",
+ "torii-core",
 ]
 
 [[package]]
 name = "torii-core"
 version = "0.5.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2ba7ce65d21038ed8d009e47c0b59896852f6b2acbc68cd0f71e45bbd2e3dac3"
-dependencies = [
- "async-trait",
- "b58",
- "base64 0.22.1",
- "chrono",
- "dashmap",
- "downcast-rs",
- "jsonwebtoken",
- "password-auth",
- "rand 0.9.5",
- "regex",
- "serde",
- "serde_json",
- "thiserror 2.0.20",
- "tokio",
- "tracing",
- "uuid",
-]
-
-[[package]]
-name = "torii-core"
-version = "0.5.2"
-source = "git+https://github.com/cmackenzie1/torii-rs#52d23111bf2b39dadbf02c4fe1b05ef9bf7b11d3"
+source = "git+https://github.com/cmackenzie1/torii-rs?rev=52d23111bf2b39dadbf02c4fe1b05ef9bf7b11d3#52d23111bf2b39dadbf02c4fe1b05ef9bf7b11d3"
 dependencies = [
  "async-trait",
  "b58",
@@ -5637,6 +5614,7 @@ dependencies = [
  "downcast-rs",
  "getrandom 0.3.4",
  "hex",
+ "jsonwebtoken",
  "password-auth",
  "rand 0.9.5",
  "regex",
@@ -5653,26 +5631,52 @@ dependencies = [
 [[package]]
 name = "torii-migration"
 version = "0.5.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "89e5387b7044e333ef5b7ecceb8c79e1d4b1184744c19dc923a7abfbfb85e645"
+source = "git+https://github.com/cmackenzie1/torii-rs?rev=52d23111bf2b39dadbf02c4fe1b05ef9bf7b11d3#52d23111bf2b39dadbf02c4fe1b05ef9bf7b11d3"
 dependencies = [
  "async-trait",
  "chrono",
  "sqlx",
  "thiserror 2.0.20",
- "torii-core 0.5.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "torii-core",
+]
+
+[[package]]
+name = "torii-services"
+version = "0.5.2"
+source = "git+https://github.com/cmackenzie1/torii-rs?rev=52d23111bf2b39dadbf02c4fe1b05ef9bf7b11d3#52d23111bf2b39dadbf02c4fe1b05ef9bf7b11d3"
+dependencies = [
+ "async-trait",
+ "b58",
+ "base64 0.22.1",
+ "chrono",
+ "dashmap",
+ "downcast-rs",
+ "hex",
+ "jsonwebtoken",
+ "password-auth",
+ "rand 0.9.5",
+ "regex",
+ "secrecy",
+ "serde",
+ "serde_json",
+ "sha2",
+ "subtle",
+ "thiserror 2.0.20",
+ "tokio",
+ "torii-core",
+ "tracing",
+ "uuid",
 ]
 
 [[package]]
 name = "torii-storage-sqlite"
 version = "0.5.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5900e0af5f0306895c1bc356618f094297264eb01eab7ee1ad7aed74069c86be"
+source = "git+https://github.com/cmackenzie1/torii-rs?rev=52d23111bf2b39dadbf02c4fe1b05ef9bf7b11d3#52d23111bf2b39dadbf02c4fe1b05ef9bf7b11d3"
 dependencies = [
  "async-trait",
  "chrono",
  "sqlx",
- "torii-core 0.5.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "torii-core",
  "torii-migration",
  "tracing",
  "uuid",
