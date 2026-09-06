@@ -4,7 +4,6 @@ use sqlx::{
     SqlitePool,
     sqlite::{SqliteConnectOptions, SqliteJournalMode, SqlitePoolOptions},
 };
-use torii_storage_sqlite::SqliteStorage;
 
 async fn connect(database_url: &str) -> Result<SqlitePool, sqlx::Error> {
     let options = SqliteConnectOptions::from_str(database_url)?
@@ -23,12 +22,9 @@ async fn migrate(pool: &SqlitePool) -> Result<(), sqlx::migrate::MigrateError> {
     sqlx::migrate!("./migrations").run(pool).await
 }
 
-pub(super) async fn initialize(database_url: &str) -> anyhow::Result<(SqlitePool, SqliteStorage)> {
+pub(super) async fn initialize(database_url: &str) -> anyhow::Result<SqlitePool> {
     let db: SqlitePool = connect(database_url).await?;
-
-    let storage = SqliteStorage::new(db.clone());
-    storage.migrate().await?;
     migrate(&db).await?;
 
-    Ok((db, storage))
+    Ok(db)
 }
