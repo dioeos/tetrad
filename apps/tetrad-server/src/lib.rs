@@ -20,31 +20,33 @@ use tracing::{Span, debug, error, info, warn};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 use crate::{
-    instance::{Instance, InstanceService, router as instance_router},
+    // instance::{Instance, InstanceService, router as instance_router},
     state::AppState,
+    model::ModelManager
 };
 
 pub use config::{Config, use_config};
 
 pub async fn build_app(config: &'static Config) -> anyhow::Result<Router> {
-    let db = database::initialize(&config.database_url).await?;
-    let instance_service: InstanceService = instance::create_service(db.clone());
+    // let db = database::initialize(&config.database_url).await?;
+    // let instance_service: InstanceService = instance::create_service(db.clone());
+    //
+    // let current_instance: Instance = instance_service
+    //     .ensure_exists(&config.instance_name)
+    //     .await?;
 
-    let current_instance: Instance = instance_service
-        .ensure_exists(&config.instance_name)
-        .await?;
+    // info!(
+    //     id = current_instance.id,
+    //     name = current_instance.name,
+    //     "instance initialized"
+    // );
+    let model_manager = ModelManager::new().await?;
 
-    info!(
-        id = current_instance.id,
-        name = current_instance.name,
-        "instance initialized"
-    );
-
-    let state = AppState::new(db, config, instance_service);
+    let state = AppState::new(model_manager);
 
     Ok(Router::new()
         .route("/", get(|| async { "Hello, World!" }))
-        .merge(instance_router())
+        // .merge(instance_router())
         .with_state(state)
         .layer(
             TraceLayer::new_for_http()

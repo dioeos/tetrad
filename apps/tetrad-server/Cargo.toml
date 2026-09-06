@@ -20,6 +20,7 @@ time = "0.3.55"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "std", "fmt"] }
 tower-http = { version = "0.7.0", features = ["trace"] }
 thiserror = "2.0.20"
+derive_more = { version = "2.1.1", features = ["from", "display"] }
 
 [dev-dependencies]
 axum-test = "21.1.0"

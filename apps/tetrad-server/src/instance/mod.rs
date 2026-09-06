@@ -14,7 +14,7 @@ use sqlite::SqliteInstanceRepository;
 use sqlx::SqlitePool;
 
 //@NOTE: PUBLIC API OF `instance`
-pub(crate) use http::router;
+// pub(crate) use http::router;
 pub(crate) use model::Instance;
 pub(crate) use service::{InstanceError, InstanceService};
 

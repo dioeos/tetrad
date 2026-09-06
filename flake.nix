@@ -72,6 +72,7 @@
           rustfmt
           clippy
           rust-analyzer
+          cargo-watch
 
           nixd
           nixfmt

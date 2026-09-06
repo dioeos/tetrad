@@ -1,29 +1,22 @@
-use std::sync::Arc;
-
-use axum::extract::FromRef;
-use sqlx::SqlitePool;
-
-use crate::{Config, instance::InstanceService};
+use crate::{Config, instance::InstanceService, model::ModelManager};
 
 #[derive(Clone)]
 pub(crate) struct AppState {
-    pub(crate) _db: SqlitePool,
-    pub(crate) _config: Arc<Config>,
-    pub(crate) instance_service: InstanceService,
+    pub(crate) model_manager: ModelManager
+    // pub(crate) instance_service: InstanceService,
 }
 
 impl AppState {
-    pub(crate) fn new(db: SqlitePool, config: Config, instance_service: InstanceService) -> Self {
+    pub(crate) fn new(mm: ModelManager) -> Self {
         Self {
-            _db: db,
-            _config: Arc::new(config),
-            instance_service,
+            model_manager: mm
+            // instance_service,
         }
     }
 }
 
-impl FromRef<AppState> for InstanceService {
-    fn from_ref(app_state: &AppState) -> InstanceService {
-        app_state.instance_service.clone()
-    }
-}
+// impl FromRef<AppState> for InstanceService {
+//     fn from_ref(app_state: &AppState) -> InstanceService {
+//         app_state.instance_service.clone()
+//     }
+// }
