@@ -27,6 +27,7 @@ uuid.workspace = true
 tauri = { version = "2", features = [] }
 tauri-plugin-opener = "2"
 reqwest = { version = "0.13.4", features = ["json"] }
+openidconnect = "4.0.1"
 
 
 # Read the optimization guideline for more details: https://tauri.app/concept/size/#cargo-configuration
