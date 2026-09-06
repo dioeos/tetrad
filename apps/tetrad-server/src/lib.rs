@@ -5,6 +5,8 @@ mod error;
 mod instance;
 mod state;
 
+mod model;
+
 use std::time::Duration;
 
 use axum::{
@@ -22,9 +24,9 @@ use crate::{
     state::AppState,
 };
 
-pub use config::Config;
+pub use config::{Config, use_config};
 
-pub async fn build_app(config: Config) -> anyhow::Result<Router> {
+pub async fn build_app(config: &'static Config) -> anyhow::Result<Router> {
     let db = database::initialize(&config.database_url).await?;
     let instance_service: InstanceService = instance::create_service(db.clone());
 
@@ -81,7 +83,7 @@ pub async fn build_app(config: Config) -> anyhow::Result<Router> {
         ))
 }
 
-pub async fn run(config: Config) -> anyhow::Result<()> {
+pub async fn run(config: &'static Config) -> anyhow::Result<()> {
     tracing_subscriber::registry()
         .with(
             tracing_subscriber::EnvFilter::try_from_default_env()
@@ -95,18 +97,19 @@ pub async fn run(config: Config) -> anyhow::Result<()> {
         .init();
 
     info!(
-        db_url = &config.database_url,
-        bind_address = %config.bind_address,
-        instance = &config.instance_name,
-        base_url = &config.base_url,
-        "tetrad server configurations"
+        "{:<12} - DB: {}, Bind: {}, Instance: {}, Base: {}",
+        "TETRAD SERVER CONFIG",
+        config.database_url,
+        config.bind_address,
+        config.instance_name,
+        config.base_url,
     );
 
     let listener = tokio::net::TcpListener::bind(&config.bind_address)
         .await
         .unwrap();
 
-    info!("server listening on http://{}", &config.bind_address);
+    info!("{:<12} - {}", "LISTENING", &config.bind_address);
 
     let app = build_app(config).await?;
 
