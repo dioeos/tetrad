@@ -13,11 +13,7 @@ pub(crate) struct AppState {
 }
 
 impl AppState {
-    pub(crate) fn new(
-        db: SqlitePool,
-        config: Config,
-        instance_service: InstanceService,
-    ) -> Self {
+    pub(crate) fn new(db: SqlitePool, config: Config, instance_service: InstanceService) -> Self {
         Self {
             _db: db,
             _config: Arc::new(config),
