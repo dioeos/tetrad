@@ -16,7 +16,6 @@
         version = "0.1.0";
 
         src = ./.;
-        cargoRoot = "apps/tetrad-server";
         buildAndTestSubdir = "apps/tetrad-server";
         cargoLock.lockFile = ./Cargo.lock;
       };
@@ -26,8 +25,7 @@
         version = "0.1.0";
 
         src = ./.;
-        cargoRoot = "apps/tetrad-client/src-tauri";
-        buildAndTestSubdir = finalAttrs.cargoRoot;
+        buildAndTestSubdir = "apps/tetrad-client/src-tauri";
         cargoLock.lockFile = ./Cargo.lock;
 
         pnpmRoot = "apps/tetrad-client";
