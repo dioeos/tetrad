@@ -1,7 +1,11 @@
+use std::str::FromStr;
+
 use sqlx::{FromRow};
 use time::Timestamp;
+use uuid::Uuid;
 
 use super::{
+    base::DbBmc,
     error::Error,
     ModelManager
 };
@@ -15,7 +19,8 @@ use super::{
 //       used in internal business logic
 #[derive(Debug)]
 pub(in crate::model) struct Instance {
-    pub(in crate::model) id: String,
+    pub(in crate::model) id: i64,
+    pub(in crate::model) uuid: Uuid,
     pub(in crate::model) name: String,
     pub(in crate::model) setup_completed_at_ms: Option<Timestamp>,
     pub(in crate::model) created_at_ms: Timestamp,
@@ -24,7 +29,8 @@ pub(in crate::model) struct Instance {
 
 #[derive(Debug, FromRow)]
 pub(in crate::model::instance) struct InstanceRow {
-    pub(in crate::model::instance) id: String,
+    pub(in crate::model::instance) id: i64,
+    pub(in crate::model::instance) uuid: String,
     pub(in crate::model::instance) name: String,
     pub(in crate::model::instance) setup_completed_at_ms: Option<i64>,
     pub(in crate::model::instance) created_at_ms: i64,
@@ -34,17 +40,23 @@ pub(in crate::model::instance) struct InstanceRow {
 impl TryFrom<InstanceRow> for Instance {
     type Error = Error;
     fn try_from(row: InstanceRow) -> Result<Instance, Self::Error> {
-        let convert = |ms| {
+        let convert_to_timestamp = |ms: i64| {
             Timestamp::from_milliseconds(ms)
                 .map_err(Error::InvalidInstanceTimestamp)
         };
 
+        let convert_to_uuid = |id: &str| {
+            Uuid::from_str(id)
+                .map_err(Error::InvalidInstanceUuid)
+        };
+
         Ok(Instance {
             id: row.id,
+            uuid: convert_to_uuid(&row.uuid)?,
             name: row.name,
-            setup_completed_at_ms: row.setup_completed_at_ms.map(convert).transpose()?,
-            created_at_ms: convert(row.created_at_ms)?,
-            updated_at_ms: convert(row.updated_at_ms)?
+            setup_completed_at_ms: row.setup_completed_at_ms.map(convert_to_timestamp).transpose()?,
+            created_at_ms: convert_to_timestamp(row.created_at_ms)?,
+            updated_at_ms: convert_to_timestamp(row.updated_at_ms)?
         })
     }
 }
@@ -60,9 +72,13 @@ pub(in crate::model) struct InstanceForUpdate {
 }
 
 
-pub struct TaskBmc;
+pub struct InstanceBmc;
 
-impl TaskBmc {
+impl DbBmc for InstanceBmc {
+    const TABLE: &'static str = "instances";
+}
+
+impl InstanceBmc {
     pub async fn create(
         mm: &ModelManager,
         instance_c: InstanceForCreate

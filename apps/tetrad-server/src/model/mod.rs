@@ -1,16 +1,17 @@
-mod store;
+mod base;
 mod error;
+mod store;
 
 // entity models + bmcs
 mod instance;
 
+use error::Error;
 use store::dbx::Dbx;
 use store::new_db_pool;
-use error::Error;
 
 #[derive(Clone)]
 pub struct ModelManager {
-    dbx: Dbx
+    dbx: Dbx,
 }
 
 impl ModelManager {

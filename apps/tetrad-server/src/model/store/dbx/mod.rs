@@ -1,10 +1,10 @@
 mod error;
 
-use std::sync::Arc;
+use std::{ops::{Deref, DerefMut}, sync::Arc};
 
 use super::Db;
 pub use error::Error;
-use sqlx::{Sqlite, Transaction};
+use sqlx::{FromRow, IntoArguments, Sqlite, Transaction, query::QueryAs, sqlite::SqliteRow};
 
 #[derive(Clone)]
 pub struct Dbx {
@@ -37,6 +37,24 @@ impl Dbx {
         }
         Ok(())
     }
+    pub async fn fetch_one<'q, O, A>(&self, query: QueryAs<'q, Sqlite, O, A>) -> Result<O, Error>
+    where
+        O: for<'r> FromRow<'r, SqliteRow> + Send + Unpin,
+        A: IntoArguments<'q, Sqlite> + 'q,
+    {
+        let data = if self.with_txn {
+            let mut txh_g = self.txn_holder.lock().await;
+            if let Some(txn) = txh_g.as_deref_mut() {
+                query.fetch_one(txn.as_mut()).await?
+            } else {
+                query.fetch_one(self.db()).await?
+            }
+        } else {
+            query.fetch_one(self.db()).await?
+        };
+
+        Ok(data)
+    }
 
     pub fn db(&self) -> &Db {
         &self.db_pool
@@ -46,6 +64,20 @@ impl Dbx {
 struct TxnHolder {
     txn: Transaction<'static, Sqlite>,
     counter: i32,
+}
+
+impl Deref for TxnHolder {
+    type Target = Transaction<'static, Sqlite>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.txn
+    }
+}
+
+impl DerefMut for TxnHolder {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.txn
+    }
 }
 
 impl TxnHolder {
