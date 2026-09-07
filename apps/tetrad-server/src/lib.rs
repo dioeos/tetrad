@@ -6,6 +6,7 @@ mod instance;
 mod state;
 
 mod model;
+mod entities;
 
 use std::time::Duration;
 
@@ -27,7 +28,7 @@ use crate::{
 
 pub use config::{Config, use_config};
 
-pub async fn build_app(config: &'static Config) -> anyhow::Result<Router> {
+pub async fn build_app(database_url: &str) -> anyhow::Result<Router> {
     // let db = database::initialize(&config.database_url).await?;
     // let instance_service: InstanceService = instance::create_service(db.clone());
     //
@@ -40,7 +41,7 @@ pub async fn build_app(config: &'static Config) -> anyhow::Result<Router> {
     //     name = current_instance.name,
     //     "instance initialized"
     // );
-    let model_manager = ModelManager::new().await?;
+    let model_manager = ModelManager::new(database_url).await?;
 
     let state = AppState::new(model_manager);
 
@@ -113,7 +114,7 @@ pub async fn run(config: &'static Config) -> anyhow::Result<()> {
 
     info!("{:<12} - {}", "LISTENING", &config.bind_address);
 
-    let app = build_app(config).await?;
+    let app = build_app(&config.database_url).await?;
 
     axum::serve(listener, app).await.unwrap();
 

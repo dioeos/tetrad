@@ -37,6 +37,10 @@ impl Dbx {
         }
         Ok(())
     }
+
+    pub fn db(&self) -> &Db {
+        &self.db_pool
+    }
 }
 
 struct TxnHolder {

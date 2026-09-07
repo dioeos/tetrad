@@ -1,17 +1,20 @@
-use super::store::dbx;
+use super::store;
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
-    // model manager
+    // model manager + store
     #[error("{self:?}")]
-    CantCreateModelManagerProvider(String),
-
-    #[error("{self:?}")]
-    CantConnectToSqlite(#[source] sqlx::Error),
+    CantCreateModelManagerProvider(#[source] store::error::Error),
 
     // internal module errors
     #[error("{self:?}")]
-    Dbx(#[from] dbx::Error),
+    Dbx(#[from] store::dbx::Error),
+
+    // instace bmc
+    #[error("{self:?}")]
+    InvalidInstanceTimestamp(#[from] time::error::ComponentRange),
+
+    // externals
+    #[error("{self:?}")]
+    Sqlx(#[from] sqlx::Error)
 }
-
-
