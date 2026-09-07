@@ -2,7 +2,6 @@ mod common;
 mod config;
 mod database;
 mod error;
-mod instance;
 mod state;
 
 mod model;
