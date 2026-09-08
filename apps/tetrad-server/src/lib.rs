@@ -1,6 +1,5 @@
 mod common;
 mod config;
-mod database;
 mod error;
 mod state;
 
@@ -21,16 +20,12 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 use crate::{
     // instance::{Instance, InstanceService, router as instance_router},
-    state::AppState,
-    model::ModelManager
+    model::{InstanceBmc, InstanceForCreate, ModelManager}, state::AppState
 };
 
 pub use config::{Config, use_config};
 
-pub async fn build_app(database_url: &str) -> anyhow::Result<Router> {
-    // let db = database::initialize(&config.database_url).await?;
-    // let instance_service: InstanceService = instance::create_service(db.clone());
-    //
+pub async fn build_app(database_url: &str, instance_name: &str) -> anyhow::Result<Router> {
     // let current_instance: Instance = instance_service
     //     .ensure_exists(&config.instance_name)
     //     .await?;
@@ -41,6 +36,10 @@ pub async fn build_app(database_url: &str) -> anyhow::Result<Router> {
     //     "instance initialized"
     // );
     let model_manager = ModelManager::new(database_url).await?;
+
+    let instance_c = InstanceForCreate { name: instance_name.to_owned() };
+
+    let _ = InstanceBmc::ensure_exists(&model_manager, instance_c).await?;
 
     let state = AppState::new(model_manager);
 
@@ -113,7 +112,7 @@ pub async fn run(config: &'static Config) -> anyhow::Result<()> {
 
     info!("{:<12} - {}", "LISTENING", &config.bind_address);
 
-    let app = build_app(&config.database_url).await?;
+    let app = build_app(&config.database_url, &config.instance_name).await?;
 
     axum::serve(listener, app).await.unwrap();
 

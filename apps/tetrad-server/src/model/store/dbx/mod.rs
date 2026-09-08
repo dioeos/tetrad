@@ -40,7 +40,7 @@ impl Dbx {
     pub async fn fetch_one<'q, O, A>(&self, query: QueryAs<'q, Sqlite, O, A>) -> Result<O, Error>
     where
         O: for<'r> FromRow<'r, SqliteRow> + Send + Unpin,
-        A: IntoArguments<'q, Sqlite> + 'q,
+        A: IntoArguments<Sqlite> + 'q,
     {
         let data = if self.with_txn {
             let mut txh_g = self.txn_holder.lock().await;

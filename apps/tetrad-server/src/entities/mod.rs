@@ -1,4 +1,3 @@
-mod instance;
 mod error;
 
 use axum::Router;

@@ -3,11 +3,7 @@ use std::sync::Arc;
 use tracing::debug;
 
 #[derive(Debug, thiserror::Error)]
-pub enum Error {
-    // instance
-    #[error("{self:?}")]
-    NoExistingInstance,
-}
+pub enum Error {}
 
 impl IntoResponse for Error {
     fn into_response(self) -> axum::response::Response {

@@ -1,8 +1,13 @@
 use std::str::FromStr;
 
+use sea_query::{Expr, Iden, OnConflict, Query, SqliteQueryBuilder};
+use sea_query_sqlx::SqlxBinder;
+use serde::Deserialize;
 use sqlx::{FromRow};
 use time::Timestamp;
 use uuid::Uuid;
+
+use crate::model::base::{CommonIden, Fields, IntoFields, prep_fields_for_create};
 
 use super::{
     base::DbBmc,
@@ -61,9 +66,23 @@ impl TryFrom<InstanceRow> for Instance {
     }
 }
 
-// #[derive(Deserialize)]
-pub(in crate::model) struct InstanceForCreate {
-    pub(in crate::model) name: String
+#[derive(Deserialize)]
+pub struct InstanceForCreate {
+    pub name: String
+}
+
+pub struct InstanceForInsert {
+    pub name: String,
+    pub uuid: String
+}
+
+impl IntoFields for InstanceForInsert {
+    fn into_fields(self) -> Fields {
+        let mut fields = Fields::default();
+        fields.push_value(InstanceIden::Name, self.name);
+        fields.push_value(InstanceIden::Uuid, self.uuid);
+        fields
+    }
 }
 
 pub(in crate::model) struct InstanceForUpdate {
@@ -71,6 +90,15 @@ pub(in crate::model) struct InstanceForUpdate {
     pub(in crate::model) updated_at_ms: Timestamp
 }
 
+pub(in crate::model) struct InstanceFilter {
+    pub(in crate::model) name: Option<String>
+}
+
+#[derive(Iden)]
+enum InstanceIden {
+    Uuid,
+    Name,
+}
 
 pub struct InstanceBmc;
 
@@ -79,16 +107,33 @@ impl DbBmc for InstanceBmc {
 }
 
 impl InstanceBmc {
-    pub async fn create(
+    pub async fn ensure_exists(
         mm: &ModelManager,
         instance_c: InstanceForCreate
     ) -> Result<i64, Error> {
-        let (id, ) = sqlx::query_as::<_, (i64,)>(
-            "INSERT INTO instances (name) values ($1) returning id",
-        )
-        .bind(instance_c.name)
-        .fetch_one(mm.dbx().db())
-        .await?;
+        let instance_fi = InstanceForInsert { 
+            name: instance_c.name,
+            uuid: Uuid::now_v7().to_string()
+        };
+        let mut fields = instance_fi.into_fields();
+        prep_fields_for_create::<Self>(&mut fields);
+
+        let (columns, values) = fields.insert_columns_and_values();
+        let mut query = Query::insert();
+        query
+            .into_table(Self::table_ref())
+            .columns(columns)
+            .values(values.into_iter().map(Expr::from))?
+            .on_conflict(
+                OnConflict::column(CommonIden::Id)
+                    .do_nothing()
+                    .to_owned()
+            )
+            .returning(Query::returning().columns([CommonIden::Id]));
+
+        let (sql, values) = query.build_sqlx(SqliteQueryBuilder);
+        let sqlx_query = sqlx::query_as_with::<_, (i64,), _>(sqlx::AssertSqlSafe(sql), values);
+        let (id,) = mm.dbx().fetch_one(sqlx_query).await?;
 
         Ok(id)
     }

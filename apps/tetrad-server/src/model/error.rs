@@ -11,7 +11,9 @@ use super::store;
 pub enum Error {
     // model manager + store
     #[error("{self:?}")]
-    CantCreateModelManagerProvider(#[source] store::error::Error),
+    CantCreateModelManagerProviderDbPool(#[source] store::error::Error),
+    #[error("{self:?}")]
+    CantMigrateManagerProviderDb(#[source] sqlx::migrate::MigrateError),
 
     // instace bmc
     #[error("{self:?}")]
@@ -23,6 +25,11 @@ pub enum Error {
     #[error("{self:?}")]
     Dbx(#[from] store::dbx::Error),
 
+    //@NOTE: The seaquery and sqlx errors at the model level can come from either base crud functions
+    //       or within the bmcs directly. For example, the `instance` module can propogate both 
+    //       since it makes direct use of base crud functions as well as implementing its own SQL
+    //       functionality
+    //
     // externals
     #[error("{self:?}")]
     SeaQuery(#[from] sea_query::error::Error),

@@ -9,6 +9,8 @@ use error::Error;
 use store::dbx::Dbx;
 use store::new_db_pool;
 
+pub use instance::{InstanceBmc, InstanceForCreate};
+
 #[derive(Clone)]
 pub struct ModelManager {
     dbx: Dbx,
@@ -18,7 +20,12 @@ impl ModelManager {
     pub async fn new(database_url: &str) -> Result<Self, Error> {
         let db_pool = new_db_pool(database_url)
             .await
-            .map_err(Error::CantCreateModelManagerProvider)?;
+            .map_err(Error::CantCreateModelManagerProviderDbPool)?;
+
+        sqlx::migrate!("./migrations")
+            .run(&db_pool)
+            .await
+            .map_err(Error::CantMigrateManagerProviderDb)?;
 
         let dbx = Dbx::new(db_pool, false)?;
         Ok(ModelManager { dbx })
