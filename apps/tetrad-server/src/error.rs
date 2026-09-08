@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 use axum::{Json, http::StatusCode, response::IntoResponse};
 use tetrad_api_contract::ApiErrorResponse;
 

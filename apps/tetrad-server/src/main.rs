@@ -1,7 +1,7 @@
-use tetrad_server::{Config, run};
+use tetrad_server::{run, use_config};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    let config = Config::from_environment()?;
+    let config = use_config();
     run(config).await
 }

@@ -3,5 +3,6 @@ CREATE TABLE instances (
   id                        TEXT NOT NULL UNIQUE,
   name                      TEXT NOT NULL,
   setup_completed_at_ms     INTEGER,
-  created_at_ms             INTEGER NOT NULL
+  created_at_ms             INTEGER NOT NULL,
+  updated_at_ms             INTEGER NOT NULL
 );

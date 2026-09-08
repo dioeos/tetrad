@@ -1,9 +1,9 @@
-mod common;
 mod config;
-mod database;
 mod error;
-mod instance;
 mod state;
+
+mod entities;
+mod model;
 
 use std::time::Duration;
 
@@ -18,31 +18,36 @@ use tracing::{Span, debug, error, info, warn};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 use crate::{
-    instance::{Instance, InstanceService, router as instance_router},
+    // instance::{Instance, InstanceService, router as instance_router},
+    model::{InstanceBmc, InstanceForCreate, ModelManager},
     state::AppState,
 };
 
-pub use config::Config;
+pub use config::{Config, use_config};
 
-pub async fn build_app(config: Config) -> anyhow::Result<Router> {
-    let db = database::initialize(&config.database_url).await?;
-    let instance_service: InstanceService = instance::create_service(db.clone());
+pub async fn build_app(database_url: &str, instance_name: &str) -> anyhow::Result<Router> {
+    // let current_instance: Instance = instance_service
+    //     .ensure_exists(&config.instance_name)
+    //     .await?;
 
-    let current_instance: Instance = instance_service
-        .ensure_exists(&config.instance_name)
-        .await?;
+    // info!(
+    //     id = current_instance.id,
+    //     name = current_instance.name,
+    //     "instance initialized"
+    // );
+    let model_manager = ModelManager::new(database_url).await?;
 
-    info!(
-        id = current_instance.id,
-        name = current_instance.name,
-        "instance initialized"
-    );
+    let instance_c = InstanceForCreate {
+        name: instance_name.to_owned(),
+    };
 
-    let state = AppState::new(db, config, instance_service);
+    let _ = InstanceBmc::ensure_exists(&model_manager, instance_c).await?;
+
+    let state = AppState::new(model_manager);
 
     Ok(Router::new()
         .route("/", get(|| async { "Hello, World!" }))
-        .merge(instance_router())
+        // .merge(instance_router())
         .with_state(state)
         .layer(
             TraceLayer::new_for_http()
@@ -81,7 +86,7 @@ pub async fn build_app(config: Config) -> anyhow::Result<Router> {
         ))
 }
 
-pub async fn run(config: Config) -> anyhow::Result<()> {
+pub async fn run(config: &'static Config) -> anyhow::Result<()> {
     tracing_subscriber::registry()
         .with(
             tracing_subscriber::EnvFilter::try_from_default_env()
@@ -95,20 +100,21 @@ pub async fn run(config: Config) -> anyhow::Result<()> {
         .init();
 
     info!(
-        db_url = &config.database_url,
-        bind_address = %config.bind_address,
-        instance = &config.instance_name,
-        base_url = &config.base_url,
-        "tetrad server configurations"
+        "{:<12} - DB: {}, Bind: {}, Instance: {}, Base: {}",
+        "TETRAD SERVER CONFIG",
+        config.database_url,
+        config.bind_address,
+        config.instance_name,
+        config.base_url,
     );
 
     let listener = tokio::net::TcpListener::bind(&config.bind_address)
         .await
         .unwrap();
 
-    info!("server listening on http://{}", &config.bind_address);
+    info!("{:<12} - {}", "LISTENING", &config.bind_address);
 
-    let app = build_app(config).await?;
+    let app = build_app(&config.database_url, &config.instance_name).await?;
 
     axum::serve(listener, app).await.unwrap();
 

@@ -1,4 +1,4 @@
-use std::net::SocketAddr;
+use std::{net::SocketAddr, sync::OnceLock};
 
 use anyhow::Context;
 
@@ -7,6 +7,15 @@ pub struct Config {
     pub(crate) bind_address: SocketAddr,
     pub(crate) instance_name: String,
     pub(crate) base_url: String,
+}
+
+pub fn use_config() -> &'static Config {
+    static INSTANCE: OnceLock<Config> = OnceLock::new();
+
+    INSTANCE.get_or_init(|| {
+        Config::load_from_environment()
+            .unwrap_or_else(|err| panic!("FATAL - WHILE LOADING CONF - Cause: {err:?}"))
+    })
 }
 
 impl Config {
@@ -23,7 +32,8 @@ impl Config {
             base_url: base_url.into(),
         }
     }
-    pub fn from_environment() -> anyhow::Result<Self> {
+
+    fn load_from_environment() -> anyhow::Result<Self> {
         let database_url = std::env::var("DATABASE_URL")
             .unwrap_or_else(|_| "sqlite://apps/tetrad-server/data/tetrad.sqlite3".to_owned());
 
