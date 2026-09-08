@@ -1,6 +1,6 @@
 mod crud_fns;
 
-pub(in crate::model) use crud_fns::{prep_fields_for_create};
+pub(in crate::model) use crud_fns::prep_fields_for_create;
 
 use sea_query::{Alias, DynIden, Iden, IntoIden, IntoTableRef, TableRef, Value};
 
@@ -71,7 +71,7 @@ impl Fields {
     pub fn insert_some<C, V>(&mut self, column: C, value: Option<V>)
     where
         C: IntoIden,
-        V: Into<Value>
+        V: Into<Value>,
     {
         if let Some(value) = value {
             self.push_value(column, value)

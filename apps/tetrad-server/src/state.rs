@@ -2,15 +2,13 @@ use crate::{Config, model::ModelManager};
 
 #[derive(Clone)]
 pub(crate) struct AppState {
-    pub(crate) model_manager: ModelManager
-    // pub(crate) instance_service: InstanceService,
+    pub(crate) model_manager: ModelManager, // pub(crate) instance_service: InstanceService,
 }
 
 impl AppState {
     pub(crate) fn new(mm: ModelManager) -> Self {
         Self {
-            model_manager: mm
-            // instance_service,
+            model_manager: mm, // instance_service,
         }
     }
 }

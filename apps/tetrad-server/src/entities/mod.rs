@@ -2,11 +2,8 @@ mod error;
 
 use axum::Router;
 
-use crate::{
-    model::ModelManager
-};
+use crate::model::ModelManager;
 
 pub fn instance_routes(mm: ModelManager) -> Router {
-    Router::new()
-        .with_state(mm)
+    Router::new().with_state(mm)
 }

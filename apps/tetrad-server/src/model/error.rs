@@ -15,7 +15,11 @@ pub enum Error {
     #[error("{self:?}")]
     CantMigrateManagerProviderDb(#[source] sqlx::migrate::MigrateError),
 
-    // instace bmc
+    // instance bmc
+    #[error("failed to insert the singleton instance")]
+    FailedToInsertInstance(#[source] store::dbx::Error),
+    #[error("failed to retrieve the existing singleton instance")]
+    FailedToGetExistingInstance(#[source] store::dbx::Error),
     #[error("{self:?}")]
     InvalidInstanceTimestamp(#[from] time::error::ComponentRange),
     #[error("{self:?}")]
@@ -26,7 +30,7 @@ pub enum Error {
     Dbx(#[from] store::dbx::Error),
 
     //@NOTE: The seaquery and sqlx errors at the model level can come from either base crud functions
-    //       or within the bmcs directly. For example, the `instance` module can propogate both 
+    //       or within the bmcs directly. For example, the `instance` module can propogate both
     //       since it makes direct use of base crud functions as well as implementing its own SQL
     //       functionality
     //
@@ -35,5 +39,5 @@ pub enum Error {
     SeaQuery(#[from] sea_query::error::Error),
 
     #[error("{self:?}")]
-    Sqlx(#[from] sqlx::Error)
+    Sqlx(#[from] sqlx::Error),
 }

@@ -40,8 +40,8 @@ mod tests {
 
     #[tokio::test]
     async fn returns_fail_to_create_pool_when_parent_directory_is_missing() {
-        let missing_dir = std::env::temp_dir()
-            .join(format!("tetrad-missing-{}", uuid::Uuid::now_v7()));
+        let missing_dir =
+            std::env::temp_dir().join(format!("tetrad-missing-{}", uuid::Uuid::now_v7()));
 
         assert!(!missing_dir.exists());
 

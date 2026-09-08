@@ -3,8 +3,8 @@ mod config;
 mod error;
 mod state;
 
-mod model;
 mod entities;
+mod model;
 
 use std::time::Duration;
 
@@ -20,7 +20,8 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 use crate::{
     // instance::{Instance, InstanceService, router as instance_router},
-    model::{InstanceBmc, InstanceForCreate, ModelManager}, state::AppState
+    model::{InstanceBmc, InstanceForCreate, ModelManager},
+    state::AppState,
 };
 
 pub use config::{Config, use_config};
@@ -37,7 +38,9 @@ pub async fn build_app(database_url: &str, instance_name: &str) -> anyhow::Resul
     // );
     let model_manager = ModelManager::new(database_url).await?;
 
-    let instance_c = InstanceForCreate { name: instance_name.to_owned() };
+    let instance_c = InstanceForCreate {
+        name: instance_name.to_owned(),
+    };
 
     let _ = InstanceBmc::ensure_exists(&model_manager, instance_c).await?;
 

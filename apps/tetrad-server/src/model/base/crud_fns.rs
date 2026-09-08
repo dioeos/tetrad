@@ -1,9 +1,8 @@
-use super::{CommonIden, DbBmc, TimestampIden, IntoFields, Fields};
+use super::{CommonIden, DbBmc, Fields, IntoFields, TimestampIden};
 use crate::model::{Error, ModelManager};
 use sea_query::{Expr, Query, SqliteQueryBuilder};
 use sea_query_sqlx::SqlxBinder;
 use time::Timestamp;
-
 
 pub(in crate::model) async fn create<BMC, ETY>(mm: &ModelManager, data: ETY) -> Result<i64, Error>
 where

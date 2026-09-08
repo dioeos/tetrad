@@ -10,5 +10,5 @@ pub enum Error {
     NoTxn,
 
     #[error("{self:?}")]
-    Sqlx(#[from] sqlx::Error)
+    Sqlx(#[from] sqlx::Error),
 }
