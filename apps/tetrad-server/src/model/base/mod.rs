@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 mod crud_fns;
 
 pub(in crate::model) use crud_fns::prep_fields_for_create;

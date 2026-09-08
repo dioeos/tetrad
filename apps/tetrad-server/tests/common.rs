@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 use axum_test::TestResponse;
 use serde_json::Value;
 use tetrad_server::Config;

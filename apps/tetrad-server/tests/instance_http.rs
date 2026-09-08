@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 use axum_test::TestServer;
 use serde_json::{Value, json};
 use sqlx::SqlitePool;

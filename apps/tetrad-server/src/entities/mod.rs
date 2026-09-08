@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 mod error;
 
 use axum::Router;

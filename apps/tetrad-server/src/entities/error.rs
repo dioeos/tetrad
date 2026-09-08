@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 use axum::{http::StatusCode, response::IntoResponse};
 use std::sync::Arc;
 use tracing::debug;

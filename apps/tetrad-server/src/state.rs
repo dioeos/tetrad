@@ -1,6 +1,7 @@
-use crate::{Config, model::ModelManager};
+use crate::model::ModelManager;
 
 #[derive(Clone)]
+#[allow(unused)]
 pub(crate) struct AppState {
     pub(crate) model_manager: ModelManager, // pub(crate) instance_service: InstanceService,
 }

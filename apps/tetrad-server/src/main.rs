@@ -1,4 +1,4 @@
-use tetrad_server::{Config, run, use_config};
+use tetrad_server::{run, use_config};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {

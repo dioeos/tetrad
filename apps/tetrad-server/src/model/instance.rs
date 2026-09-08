@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 use std::str::FromStr;
 
 use sea_query::{Expr, Iden, OnConflict, Query, SqliteQueryBuilder};
