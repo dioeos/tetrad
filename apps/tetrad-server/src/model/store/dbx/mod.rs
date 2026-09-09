@@ -61,6 +61,25 @@ impl Dbx {
         Ok(data)
     }
 
+    pub async fn fetch_optional<'q, O, A>(&self, query: QueryAs<'q, Sqlite, O, A>) -> Result<Option<O>, Error>
+    where
+        O: for<'r> FromRow<'r, SqliteRow> + Send + Unpin,
+        A: IntoArguments<Sqlite> + 'q,
+    {
+        let data = if self.with_txn {
+            let mut txh_g = self.txn_holder.lock().await;
+            if let Some(txn) = txh_g.as_deref_mut() {
+                query.fetch_optional(txn.as_mut()).await?
+            } else {
+                query.fetch_optional(self.db()).await?
+            }
+        } else {
+            query.fetch_optional(self.db()).await?
+        };
+
+        Ok(data)
+    }
+
     pub fn db(&self) -> &Db {
         &self.db_pool
     }

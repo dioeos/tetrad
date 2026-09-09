@@ -15,6 +15,13 @@ pub enum Error {
     #[error("{self:?}")]
     CantMigrateManagerProviderDb(#[source] sqlx::migrate::MigrateError),
 
+    //custom base bmc
+    #[error("{self:?}")]
+    EntityNotFound {
+        entity: &'static str,
+        id: i64
+    },
+
     // instance bmc
     #[error("failed to insert the singleton instance")]
     FailedToInsertInstance(#[source] store::dbx::Error),
