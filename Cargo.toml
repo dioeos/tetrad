@@ -1,18 +1,26 @@
 [workspace]
 resolver = "3"
 members = [
-    "apps/tetrad-server",
+    # === Tetrad Server Lib Crates === #
     "apps/tetrad-server/crates/tetrad-core",
     "apps/tetrad-server/crates/tetrad-web",
+    # === Tetrad Server Main Crate === #
+    "apps/tetrad-server/services/tetrad-app",
+
     "apps/tetrad-client/src-tauri",
     "tetrad-api-contract"
 ]
 
 [workspace.dependencies]
 async-trait = "0.1.92"
+axum = "0.8.9"
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1.0"
+thiserror = "2.0.20"
 tokio = { version = "1", features = ["full"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "std", "fmt"] }
+tower-http = { version = "0.7.0", features = ["trace"] }
 uuid = { version = "1", features = ["serde", "v4", "v7"] }
 
 [workspace.package]

@@ -5435,6 +5435,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "tetrad-app"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "serde",
+ "serde_json",
+ "tetrad-core",
+ "tetrad-web",
+ "thiserror 2.0.20",
+ "tokio",
+ "tower-http 0.7.1",
+ "tracing",
+ "tracing-subscriber",
+]
+
+[[package]]
 name = "tetrad-client"
 version = "0.1.0"
 dependencies = [
@@ -5466,18 +5482,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "tetrad-server"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "async-trait",
- "serde",
- "serde_json",
- "tetrad-api-contract",
- "uuid",
-]
-
-[[package]]
 name = "tetrad-web"
 version = "0.1.0"
 dependencies = [
@@ -5486,6 +5490,7 @@ dependencies = [
  "serde",
  "serde_json",
  "tetrad-core",
+ "thiserror 2.0.20",
  "tower-http 0.7.1",
  "tracing",
  "tracing-subscriber",

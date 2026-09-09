@@ -3,10 +3,10 @@ use std::{net::SocketAddr, sync::OnceLock};
 use crate::error::Error;
 
 pub struct Config {
-    pub(crate) database_url: String,
-    pub(crate) bind_address: SocketAddr,
-    pub(crate) instance_name: String,
-    pub(crate) base_url: String,
+    pub database_url: String,
+    pub bind_address: SocketAddr,
+    pub instance_name: String,
+    pub base_url: String,
 }
 
 pub fn use_config() -> &'static Config {
