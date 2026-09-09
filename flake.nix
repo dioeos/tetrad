@@ -16,8 +16,14 @@
         version = "0.1.0";
 
         src = ./.;
-        buildAndTestSubdir = "apps/tetrad-server";
         cargoLock.lockFile = ./Cargo.lock;
+
+        cargoBuildFlags = [ "-p" "tetrad-app" ];
+        cargoTestFlags = [
+          "-p" "tetrad-app"
+          "-p" "tetrad-core"
+          "-p" "tetrad-web"
+        ];
       };
 
       tetrad-tauri-pkg = pkgs.rustPlatform.buildRustPackage (finalAttrs: {

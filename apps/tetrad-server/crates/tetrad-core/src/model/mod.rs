@@ -3,13 +3,12 @@ mod error;
 mod store;
 
 // entity models + bmcs
-mod instance;
+pub mod instance;
 
 use store::dbx::Dbx;
 use store::new_db_pool;
 
 pub use self::error::Error;
-pub use instance::{Instance, InstanceBmc, InstanceForCreate, InstanceRow};
 
 #[derive(Clone)]
 pub struct ModelManager {
@@ -22,7 +21,7 @@ impl ModelManager {
             .await
             .map_err(Error::CantCreateModelManagerProviderDbPool)?;
 
-        sqlx::migrate!("./migrations")
+        sqlx::migrate!("../../migrations")
             .run(&db_pool)
             .await
             .map_err(Error::CantMigrateManagerProviderDb)?;

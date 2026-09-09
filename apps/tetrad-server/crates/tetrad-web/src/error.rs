@@ -1,10 +1,8 @@
-#![allow(unused)]
+use std::sync::Arc;
 
 use axum::{http::StatusCode, response::IntoResponse};
-use std::sync::Arc;
+use tetrad_core::model;
 use tracing::debug;
-
-use crate::model;
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
@@ -12,6 +10,10 @@ pub enum Error {
     Model(#[from] model::Error),
 }
 
+//@NOTE: Converts tetrad_web::errors into internal HTTP responses.
+//       These internal HTTP responses are then transformed in the
+//       middleware layer, where the response is mapped to a specific
+//       client-side error
 impl IntoResponse for Error {
     fn into_response(self) -> axum::response::Response {
         debug!("{:<12} - entities::Error {self:?}", "INTO_RES");
