@@ -51,7 +51,7 @@ jobs:
         run: nix develop .# -c cargo fmt --check
 
       - name: Clippy
-        run: nix develop .# -c cargo clippy -p tetrad-server --all-targets --all-features -- -D warnings
+        run: nix develop .# -c cargo clippy --workspace --exclude tetrad-client --all-targets --all-features -- -D warnings
 
   test-server:
     runs-on: ubuntu-latest
@@ -64,4 +64,4 @@ jobs:
         uses: DeterminateSystems/nix-installer-action@main
 
       - name: Cargo tests
-        run: nix develop .# -c cargo test -p tetrad-server --all-targets --no-fail-fast --
+        run: nix develop .# -c cargo test --workspace --exclude tetrad-client --all-targets --no-fail-fast --
