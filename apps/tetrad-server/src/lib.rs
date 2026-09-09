@@ -20,21 +20,11 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use crate::{
     entities::instance_routes,
     model::{InstanceBmc, InstanceForCreate, ModelManager},
-    state::AppState,
 };
 
 pub use config::{Config, use_config};
 
 pub async fn build_app(database_url: &str, instance_name: &str) -> anyhow::Result<Router> {
-    // let current_instance: Instance = instance_service
-    //     .ensure_exists(&config.instance_name)
-    //     .await?;
-
-    // info!(
-    //     id = current_instance.id,
-    //     name = current_instance.name,
-    //     "instance initialized"
-    // );
     let model_manager = ModelManager::new(database_url).await?;
 
     let instance_c = InstanceForCreate {
@@ -42,8 +32,6 @@ pub async fn build_app(database_url: &str, instance_name: &str) -> anyhow::Resul
     };
 
     let _ = InstanceBmc::ensure_exists(&model_manager, instance_c).await?;
-
-    // let state = AppState::new(model_manager);
 
     Ok(Router::new()
         .route("/", get(|| async { "Hello, World!" }))
