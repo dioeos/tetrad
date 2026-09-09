@@ -4,5 +4,5 @@ pub enum Error {
     FailedToInitModelManager(#[from] tetrad_core::error::Error),
 
     #[error("{self:?}")]
-    Model(#[from] tetrad_core::model::Error)
+    Model(#[from] tetrad_core::model::Error),
 }

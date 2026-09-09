@@ -4,8 +4,14 @@ mod routes;
 use axum::{Router, routing::get};
 use error::Error;
 
-use tetrad_core::{config, model::{ModelManager, instance::{InstanceBmc, InstanceForCreate}}};
-use tracing::{info};
+use tetrad_core::{
+    config,
+    model::{
+        ModelManager,
+        instance::{InstanceBmc, InstanceForCreate},
+    },
+};
+use tracing::info;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 #[tokio::main]
@@ -42,7 +48,7 @@ async fn main() -> Result<(), Error> {
     let model_manager = ModelManager::new(&config.database_url).await?;
 
     let instance_c = InstanceForCreate {
-        name: config::use_config().instance_name.to_owned()
+        name: config::use_config().instance_name.to_owned(),
     };
 
     let _ = InstanceBmc::ensure_exists(&model_manager, instance_c).await?;
@@ -51,7 +57,9 @@ async fn main() -> Result<(), Error> {
         .route("/", get(|| async { "Hello, World!" }))
         .merge(routes::instance_routes::routes(model_manager.clone()));
 
-    axum::serve(listener, all_routes.into_make_service()).await.unwrap();
+    axum::serve(listener, all_routes.into_make_service())
+        .await
+        .unwrap();
 
     Ok(())
 }
