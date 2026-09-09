@@ -2,7 +2,7 @@
 
 mod crud_fns;
 
-pub(in crate::model) use crud_fns::prep_fields_for_create;
+pub(in crate::model) use crud_fns::{get, prep_fields_for_create};
 
 use sea_query::{Alias, DynIden, Iden, IntoIden, IntoTableRef, TableRef, Value};
 
@@ -88,6 +88,10 @@ impl Fields {
     }
 }
 
-pub(in crate::model) trait IntoFields {
+pub(crate) trait IntoFields {
     fn into_fields(self) -> Fields;
+}
+
+pub(crate) trait SelectFields {
+    fn select_columns() -> Vec<DynIden>;
 }

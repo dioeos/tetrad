@@ -4,8 +4,13 @@ use axum::{http::StatusCode, response::IntoResponse};
 use std::sync::Arc;
 use tracing::debug;
 
+use crate::model;
+
 #[derive(Debug, thiserror::Error)]
-pub enum Error {}
+pub enum Error {
+    #[error("{self:?}")]
+    Model(#[from] model::Error),
+}
 
 impl IntoResponse for Error {
     fn into_response(self) -> axum::response::Response {

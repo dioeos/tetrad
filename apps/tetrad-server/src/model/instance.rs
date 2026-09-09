@@ -2,16 +2,50 @@
 
 use std::str::FromStr;
 
-use sea_query::{Expr, Iden, OnConflict, Query, SqliteQueryBuilder};
+use sea_query::{DynIden, Expr, Iden, IntoIden, OnConflict, Query, SqliteQueryBuilder};
 use sea_query_sqlx::SqlxBinder;
-use serde::Deserialize;
-use sqlx::FromRow;
+use serde::{Deserialize, Serialize};
+use sqlx::{FromRow, sqlite::SqliteRow};
 use time::Timestamp;
 use uuid::Uuid;
 
-use crate::model::base::{CommonIden, Fields, IntoFields, prep_fields_for_create};
+use crate::model::base::{
+    self, CommonIden, Fields, IntoFields, SelectFields, TimestampIden, prep_fields_for_create,
+};
 
 use super::{ModelManager, base::DbBmc, error::Error};
+
+#[derive(Debug, Serialize)]
+pub struct Instance {
+    pub uuid: Uuid,
+    pub name: String,
+    #[serde(serialize_with = "serialize_optional_timestamp_ms")]
+    pub setup_completed_at_ms: Option<Timestamp>,
+    #[serde(serialize_with = "serialize_timestamp_ms")]
+    pub created_at_ms: Timestamp,
+    #[serde(serialize_with = "serialize_timestamp_ms")]
+    pub updated_at_ms: Timestamp,
+}
+
+fn serialize_timestamp_ms<S>(ts: &Timestamp, serializer: S) -> Result<S::Ok, S::Error>
+where
+    S: serde::Serializer,
+{
+    serializer.serialize_i64(ts.as_milliseconds())
+}
+
+fn serialize_optional_timestamp_ms<S>(
+    ts: &Option<Timestamp>,
+    serializer: S,
+) -> Result<S::Ok, S::Error>
+where
+    S: serde::Serializer,
+{
+    match ts {
+        Some(ts) => serializer.serialize_some(&ts.as_milliseconds()),
+        None => serializer.serialize_none(),
+    }
+}
 
 //@NOTE: This is not the DTO that the client receives. It is
 //       the view /representation of the instance table, meaning it is just a
@@ -19,24 +53,27 @@ use super::{ModelManager, base::DbBmc, error::Error};
 //       It is possible that a field in `FromRow` struct is not present
 //       in its corresponding DTO, as that field would only be
 //       used in internal business logic
-#[derive(Debug)]
-pub(in crate::model) struct Instance {
-    pub(in crate::model) id: i64,
-    pub(in crate::model) uuid: Uuid,
-    pub(in crate::model) name: String,
-    pub(in crate::model) setup_completed_at_ms: Option<Timestamp>,
-    pub(in crate::model) created_at_ms: Timestamp,
-    pub(in crate::model) updated_at_ms: Timestamp,
+#[derive(Debug, FromRow)]
+pub struct InstanceRow {
+    pub id: i64,
+    pub uuid: String,
+    pub name: String,
+    pub setup_completed_at_ms: Option<i64>,
+    pub created_at_ms: i64,
+    pub updated_at_ms: i64,
 }
 
-#[derive(Debug, FromRow)]
-pub(in crate::model::instance) struct InstanceRow {
-    pub(in crate::model::instance) id: i64,
-    pub(in crate::model::instance) uuid: String,
-    pub(in crate::model::instance) name: String,
-    pub(in crate::model::instance) setup_completed_at_ms: Option<i64>,
-    pub(in crate::model::instance) created_at_ms: i64,
-    pub(in crate::model::instance) updated_at_ms: i64,
+impl SelectFields for InstanceRow {
+    fn select_columns() -> Vec<DynIden> {
+        vec![
+            CommonIden::Id.into_iden(),
+            InstanceIden::Uuid.into_iden(),
+            InstanceIden::Name.into_iden(),
+            InstanceIden::SetupCompletedAtMs.into_iden(),
+            TimestampIden::CreatedAtMs.into_iden(),
+            TimestampIden::UpdatedAtMs.into_iden(),
+        ]
+    }
 }
 
 impl TryFrom<InstanceRow> for Instance {
@@ -48,7 +85,6 @@ impl TryFrom<InstanceRow> for Instance {
         let convert_to_uuid = |id: &str| Uuid::from_str(id).map_err(Error::InvalidInstanceUuid);
 
         Ok(Instance {
-            id: row.id,
             uuid: convert_to_uuid(&row.uuid)?,
             name: row.name,
             setup_completed_at_ms: row
@@ -93,6 +129,7 @@ pub(in crate::model) struct InstanceFilter {
 enum InstanceIden {
     Uuid,
     Name,
+    SetupCompletedAtMs,
 }
 
 pub struct InstanceBmc;
@@ -127,7 +164,6 @@ impl InstanceBmc {
         let sqlx_query = sqlx::query_as_with::<_, (i64,), _>(sqlx::AssertSqlSafe(sql), values);
         match mm.dbx().fetch_one(sqlx_query).await {
             Ok((id,)) => Ok(id),
-            // A skipped insert returns no row; read the existing singleton.
             Err(super::store::dbx::Error::Sqlx(sqlx::Error::RowNotFound)) => {
                 let (id,) = mm
                     .dbx()
@@ -141,6 +177,13 @@ impl InstanceBmc {
             }
             Err(error) => Err(Error::FailedToInsertInstance(error)),
         }
+    }
+
+    pub async fn get<E>(mm: &ModelManager, id: i64) -> Result<E, Error>
+    where
+        E: for<'r> FromRow<'r, SqliteRow> + Send + Unpin + SelectFields,
+    {
+        base::get::<Self, _>(mm, id).await
     }
 }
 

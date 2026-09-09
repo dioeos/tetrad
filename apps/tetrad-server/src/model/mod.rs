@@ -5,11 +5,11 @@ mod store;
 // entity models + bmcs
 mod instance;
 
-use error::Error;
 use store::dbx::Dbx;
 use store::new_db_pool;
 
-pub use instance::{InstanceBmc, InstanceForCreate};
+pub use self::error::Error;
+pub use instance::{Instance, InstanceBmc, InstanceForCreate, InstanceRow};
 
 #[derive(Clone)]
 pub struct ModelManager {
