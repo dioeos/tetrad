@@ -61,7 +61,10 @@ impl Dbx {
         Ok(data)
     }
 
-    pub async fn fetch_optional<'q, O, A>(&self, query: QueryAs<'q, Sqlite, O, A>) -> Result<Option<O>, Error>
+    pub async fn fetch_optional<'q, O, A>(
+        &self,
+        query: QueryAs<'q, Sqlite, O, A>,
+    ) -> Result<Option<O>, Error>
     where
         O: for<'r> FromRow<'r, SqliteRow> + Send + Unpin,
         A: IntoArguments<Sqlite> + 'q,

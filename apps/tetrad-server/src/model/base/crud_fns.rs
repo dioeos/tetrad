@@ -36,7 +36,7 @@ where
 pub(in crate::model) async fn get<BMC, ETY>(mm: &ModelManager, id: i64) -> Result<ETY, Error>
 where
     BMC: DbBmc,
-    ETY: for<'r> FromRow<'r, SqliteRow> + Send + Unpin + SelectFields
+    ETY: for<'r> FromRow<'r, SqliteRow> + Send + Unpin + SelectFields,
 {
     let mut query = Query::select();
     query
@@ -50,7 +50,10 @@ where
         .dbx()
         .fetch_optional(sqlx_query)
         .await?
-        .ok_or(Error::EntityNotFound { entity: BMC::TABLE, id })?;
+        .ok_or(Error::EntityNotFound {
+            entity: BMC::TABLE,
+            id,
+        })?;
 
     Ok(entity)
 }

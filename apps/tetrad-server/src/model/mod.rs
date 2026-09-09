@@ -8,8 +8,8 @@ mod instance;
 use store::dbx::Dbx;
 use store::new_db_pool;
 
-pub use instance::{InstanceBmc, InstanceForCreate, Instance, InstanceRow};
 pub use self::error::Error;
+pub use instance::{Instance, InstanceBmc, InstanceForCreate, InstanceRow};
 
 #[derive(Clone)]
 pub struct ModelManager {

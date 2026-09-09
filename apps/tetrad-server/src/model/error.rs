@@ -17,10 +17,7 @@ pub enum Error {
 
     //custom base bmc
     #[error("{self:?}")]
-    EntityNotFound {
-        entity: &'static str,
-        id: i64
-    },
+    EntityNotFound { entity: &'static str, id: i64 },
 
     // instance bmc
     #[error("failed to insert the singleton instance")]
