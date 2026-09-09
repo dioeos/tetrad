@@ -2,6 +2,8 @@
 resolver = "3"
 members = [
     "apps/tetrad-server",
+    "apps/tetrad-server/crates/tetrad-core",
+    "apps/tetrad-server/crates/tetrad-web",
     "apps/tetrad-client/src-tauri",
     "tetrad-api-contract"
 ]
@@ -10,6 +12,7 @@ members = [
 async-trait = "0.1.92"
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1.0"
+tokio = { version = "1", features = ["full"] }
 uuid = { version = "1", features = ["serde", "v4", "v7"] }
 
 [workspace.package]

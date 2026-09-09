@@ -22,7 +22,7 @@ impl ModelManager {
             .await
             .map_err(Error::CantCreateModelManagerProviderDbPool)?;
 
-        sqlx::migrate!("./migrations")
+        sqlx::migrate!("../../migrations")
             .run(&db_pool)
             .await
             .map_err(Error::CantMigrateManagerProviderDb)?;

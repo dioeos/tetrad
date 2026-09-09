@@ -1,6 +1,6 @@
 use std::{net::SocketAddr, sync::OnceLock};
 
-use anyhow::Context;
+use crate::error::Error;
 
 pub struct Config {
     pub(crate) database_url: String,
@@ -10,9 +10,9 @@ pub struct Config {
 }
 
 pub fn use_config() -> &'static Config {
-    static INSTANCE: OnceLock<Config> = OnceLock::new();
+    static CONFIG: OnceLock<Config> = OnceLock::new();
 
-    INSTANCE.get_or_init(|| {
+    CONFIG.get_or_init(|| {
         Config::load_from_environment()
             .unwrap_or_else(|err| panic!("FATAL - WHILE LOADING CONF - Cause: {err:?}"))
     })
@@ -33,14 +33,14 @@ impl Config {
         }
     }
 
-    fn load_from_environment() -> anyhow::Result<Self> {
+    fn load_from_environment() -> Result<Self, Error> {
         let database_url = std::env::var("DATABASE_URL")
             .unwrap_or_else(|_| "sqlite://apps/tetrad-server/data/tetrad.sqlite3".to_owned());
 
         let bind_address = std::env::var("TETRAD_BIND_ADDRESS")
             .unwrap_or_else(|_| "0.0.0.0:8080".to_owned())
             .parse()
-            .context("TETRAD_BIND_ADDRESS must be a socket address")?;
+            .map_err(Error::InvalidBindAddress)?;
 
         let instance_name =
             std::env::var("TETRAD_INSTANCE_NAME").unwrap_or_else(|_| "tetrad".to_owned());

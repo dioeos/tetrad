@@ -88,10 +88,10 @@ impl Fields {
     }
 }
 
-pub(crate) trait IntoFields {
+pub trait IntoFields {
     fn into_fields(self) -> Fields;
 }
 
-pub(crate) trait SelectFields {
+pub trait SelectFields {
     fn select_columns() -> Vec<DynIden>;
 }

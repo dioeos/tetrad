@@ -1,9 +1,6 @@
-mod config;
-mod error;
 mod state;
 
 mod entities;
-mod model;
 
 use std::time::Duration;
 
@@ -19,10 +16,7 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 use crate::{
     entities::instance_routes,
-    model::{InstanceBmc, InstanceForCreate, ModelManager},
 };
-
-pub use config::{Config, use_config};
 
 pub async fn build_app(database_url: &str, instance_name: &str) -> anyhow::Result<Router> {
     let model_manager = ModelManager::new(database_url).await?;

@@ -1,0 +1,16 @@
+[package]
+name = "tetrad-core"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+uuid.workspace = true
+sqlx = { version = "0.9", features = ["sqlite", "runtime-tokio", "macros", "migrate", "uuid"] }
+sea-query = "1.0.2"
+sea-query-sqlx = { version = "0.9.0", features = ["sqlx-sqlite"] }
+thiserror = "2.0.20"
+time = { version = "0.3.55", features = ["serde"] }
+tokio.workspace = true
