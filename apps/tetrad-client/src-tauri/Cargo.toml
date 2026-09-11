@@ -20,6 +20,7 @@ tauri-build = { version = "2", features = [] }
 
 [dependencies]
 tetrad-api-contract = { path = "../../../tetrad-api-contract" }
+tetrad-auth = { path = "../../../tetrad-auth" }
 async-trait.workspace = true
 serde.workspace = true
 serde_json.workspace = true

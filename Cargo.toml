@@ -8,7 +8,10 @@ members = [
     "apps/tetrad-server/services/tetrad-app",
 
     "apps/tetrad-client/src-tauri",
-    "tetrad-api-contract"
+
+    # === Crates === #
+    "tetrad-api-contract",
+    "tetrad-auth"
 ]
 
 [workspace.dependencies]

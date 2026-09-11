@@ -5451,6 +5451,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "tetrad-auth"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "thiserror 2.0.20",
+]
+
+[[package]]
 name = "tetrad-client"
 version = "0.1.0"
 dependencies = [
@@ -5463,6 +5471,7 @@ dependencies = [
  "tauri-build",
  "tauri-plugin-opener",
  "tetrad-api-contract",
+ "tetrad-auth",
  "uuid",
 ]
 
