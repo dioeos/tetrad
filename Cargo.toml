@@ -1,0 +1,9 @@
+[workspace]
+resolver = "3"
+members = [
+  "src/crates/tetrad-lib"
+]
+
+[workspace.package]
+edition = "2024"
+rust-version = "1.95"

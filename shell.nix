@@ -5,6 +5,8 @@ pkgs.mkShell {
     nixd
     nixfmt
     just
+    gnumake
+    gcc
 
     cargo
     rustc

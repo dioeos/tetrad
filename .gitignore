@@ -1,3 +1,4 @@
 .build/
 .direnv
 swiftly-x86_64.tar.gz
+target/

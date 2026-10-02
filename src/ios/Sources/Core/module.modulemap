@@ -1,0 +1,5 @@
+module TetradCore {
+  umbrella header "tetrad.h"
+  link "tetrad_lib"
+  export *
+}
