@@ -5,5 +5,11 @@ pkgs.mkShell {
     nixd
     nixfmt
     just
+
+    cargo
+    rustc
+    rustfmt
+    clippy
+    rust-analyzer
   ];
 }
