@@ -24,7 +24,7 @@ let package = Package(
         ),
         .systemLibrary(
             name: "TetradCore",
-            path: "Sources/Core"
+            path: "Sources/Core",
             pkgConfig: "tetrad",
         ),
     ]
