@@ -5,6 +5,12 @@ edition.workspace = true
 rust-version.workspace = true
 
 [dependencies]
+sqlx = { version = "0.9", features = ["sqlite", "runtime-tokio", "macros", "migrate", "uuid"] }
+sea-query = "1.0.2"
+sea-query-sqlx = { version = "0.9.0", features = ["sqlx-sqlite"] }
+
 serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
+tokio.workspace = true
+uuid.workspace = true
