@@ -1,4 +1,4 @@
-pub(super) mod error;
+pub mod error;
 pub mod instance;
 mod store;
 mod base;
@@ -10,6 +10,7 @@ use crate::model::store::dbx::Dbx;
 
 static MIGRATOR: Migrator = sqlx::migrate!("../../server/migrations");
 
+#[derive(Clone)]
 pub struct ModelManager {
     dbx: Dbx,
 }

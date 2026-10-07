@@ -4,6 +4,7 @@ members = [
   # crates
   "src/crates/tetrad-lib",
   "src/crates/tetrad-core",
+  "src/crates/tetrad-web",
 
   # web server
   "src/server/services/web-server",

@@ -1,4 +1,5 @@
 mod error;
+mod routes;
 
 use axum::{Router, routing::get};
 use error::Error;
@@ -56,7 +57,9 @@ async fn main() -> Result<(), Error> {
         .await
         .expect("failed to initialize server instance entity");
 
-    let all_routes = Router::new().route("/", get(|| async { "Hello, World!" }));
+    let all_routes = Router::new()
+        .route("/", get(|| async { "Hello, World!" }))
+        .merge(routes::instance::routes(model_manager.clone()));
 
     axum::serve(listener, all_routes.into_make_service())
         .await

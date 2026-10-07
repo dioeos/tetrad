@@ -1513,10 +1513,21 @@ dependencies = [
  "serde",
  "serde_json",
  "tetrad-core",
+ "tetrad-web",
  "thiserror",
  "tokio",
  "tracing",
  "tracing-subscriber",
+]
+
+[[package]]
+name = "tetrad-web"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "tetrad-core",
+ "thiserror",
+ "tracing",
 ]
 
 [[package]]

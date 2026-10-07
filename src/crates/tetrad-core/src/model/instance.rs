@@ -3,13 +3,17 @@ use std::str::FromStr;
 use sea_query::{DynIden, Expr, Iden, IntoIden, OnConflict, Query, SqliteQueryBuilder};
 use sea_query_sqlx::SqlxBinder;
 use serde::{Deserialize, Serialize};
-use sqlx::{FromRow, SqlSafeStr, sqlite::SqliteRow};
+use sqlx::{FromRow};
 use time::Timestamp;
 use uuid::Uuid;
 
 use crate::model::{
     ModelManager,
-    base::{CommonIden, DbBmc, Fields, IntoFields, crud_fns::prep_fields_for_create},
+    base::{
+        self, CommonIden, DbBmc, Fields, IntoFields, SelectFields, TimestampIden,
+        crud_fns::prep_fields_for_create,
+    },
+    store::dbx::SqliteRowType,
 };
 
 use super::error::Error;
@@ -58,6 +62,19 @@ pub struct InstanceRow {
     pub setup_completed_at_ms: Option<i64>,
     pub created_at_ms: i64,
     pub updated_at_ms: i64,
+}
+
+impl SelectFields for InstanceRow {
+    fn select_columns() -> Vec<DynIden> {
+        vec![
+            CommonIden::Id.into_iden(),
+            InstanceIden::Uuid.into_iden(),
+            InstanceIden::Name.into_iden(),
+            InstanceIden::SetupCompletedAtMs.into_iden(),
+            TimestampIden::CreatedAtMs.into_iden(),
+            TimestampIden::UpdatedAtMs.into_iden(),
+        ]
+    }
 }
 
 impl TryFrom<InstanceRow> for Instance {
@@ -157,6 +174,13 @@ impl InstanceBmc {
             }
             Err(err) => Err(Error::FailedToInsertInstance(err)),
         }
+    }
+
+    pub async fn get<ETY>(mm: &ModelManager, id: i64) -> Result<ETY, Error>
+    where
+        ETY: SqliteRowType + SelectFields,
+    {
+        base::crud_fns::get::<Self, _>(mm, id).await
     }
 }
 
