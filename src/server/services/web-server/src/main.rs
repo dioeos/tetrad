@@ -3,7 +3,13 @@ mod error;
 use axum::{Router, routing::get};
 use error::Error;
 
-use tetrad_core::config;
+use tetrad_core::{
+    config,
+    model::{
+        ModelManager,
+        instance::{InstanceBmc, InstanceForCreate},
+    },
+};
 use tracing::info;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
@@ -37,6 +43,18 @@ async fn main() -> Result<(), Error> {
         .unwrap();
 
     info!("{:<12} - {}", "LISTENING", config.bind_address());
+
+    let model_manager = ModelManager::new(config.database_url())
+        .await
+        .expect("failed to initialize database");
+
+    let instance_c = InstanceForCreate {
+        name: config.instance_name().to_owned(),
+    };
+
+    let _ = InstanceBmc::ensure_exists(&model_manager, instance_c)
+        .await
+        .expect("failed to initialize server instance entity");
 
     let all_routes = Router::new().route("/", get(|| async { "Hello, World!" }));
 

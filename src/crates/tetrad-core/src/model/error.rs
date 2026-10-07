@@ -11,14 +11,36 @@ use super::store;
 pub enum Error {
     #[error("{self:?}")]
     CreateModelManagerProviderDbPool(#[source] store::error::Error), 
-
     #[error("{self:?}")]
     LoadMigrations(#[source] sqlx::migrate::MigrateError),
-
     #[error("{self:?}")]
     MigrateManagerProviderDb(#[source] sqlx::migrate::MigrateError),
 
+    //instance bmc
+    #[error("failed to insert the singleton instance")]
+    FailedToInsertInstance(#[source] store::dbx::error::Error),
+    #[error("failed to retrieve the existing singleton instance")]
+    FailedToGetExistingInstance(#[source] store::dbx::error::Error),
+    #[error("{self:?}")]
+    InvalidInstanceTimestamp(#[from] time::error::ComponentRange),
+    #[error("{self:?}")]
+    InvalidInstanceUuid(#[from] uuid::Error),
+
     //internal module errors
     #[error("{self:?}")]
-    Dbx(#[from] store::dbx::error::Error)
+    Dbx(#[from] store::dbx::error::Error),
+
+    //@NOTE: The seaquery and sqlx errors at the model level can come from either base crud functions
+    //       or within the bmcs directly. For example, the `instance` module can propogate both
+    //       since it makes direct use of base crud functions as well as implementing its own SQL
+    //       functionality
+    //
+
+    // externals
+    #[error("{self:?}")]
+    SeaQuery(#[from] sea_query::error::Error),
+
+    #[error("{self:?}")]
+    Sqlx(#[from] sqlx::Error),
+
 }

@@ -2,3 +2,6 @@
 .direnv
 swiftly-x86_64.tar.gz
 target/
+
+src/server/data/*.sqlite3
+src/server/data/*.sqlite3-*
