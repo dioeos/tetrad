@@ -1,7 +1,10 @@
+mod base;
 pub mod error;
 pub mod instance;
+pub mod ports;
+pub mod services;
+pub mod vendor;
 mod store;
-mod base;
 
 use error::Error;
 use sqlx::migrate::Migrator;
@@ -30,7 +33,7 @@ impl ModelManager {
         Ok(ModelManager { dbx })
     }
 
-    pub (in crate::model) fn dbx(&self) -> &Dbx {
+    pub(in crate::model) fn dbx(&self) -> &Dbx {
         &self.dbx
     }
 }

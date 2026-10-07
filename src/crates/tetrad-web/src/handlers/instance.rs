@@ -1,11 +1,11 @@
 use axum::{Json, extract::State};
-use tetrad_core::model::{ModelManager, instance::{Instance, InstanceBmc, InstanceRow}};
+use tetrad_core::model::{instance::Instance, services::InstanceService, vendor::ModelVendor};
 
 use crate::error::Error;
 
 pub async fn api_get_handler(
-    State(mm): State<ModelManager>
+    State(service): State<InstanceService<ModelVendor>>,
 ) -> Result<Json<Instance>, Error> {
-    let row = InstanceBmc::get::<InstanceRow>(&mm, 1).await?;
-    Ok(Json(row.try_into()?))
+    let instance = service.get_instance().await?;
+    Ok(Json(instance))
 }

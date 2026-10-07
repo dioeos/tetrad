@@ -9,6 +9,8 @@ use tetrad_core::{
     model::{
         ModelManager,
         instance::{InstanceBmc, InstanceForCreate},
+        services::InstanceService,
+        vendor::ModelVendor,
     },
 };
 use tracing::info;
@@ -49,17 +51,13 @@ async fn main() -> Result<(), Error> {
         .await
         .expect("failed to initialize database");
 
-    let instance_c = InstanceForCreate {
-        name: config.instance_name().to_owned(),
-    };
+    let model_vendor = ModelVendor::new(model_manager);
 
-    let _ = InstanceBmc::ensure_exists(&model_manager, instance_c)
-        .await
-        .expect("failed to initialize server instance entity");
+    let instance_service = InstanceService::new(model_vendor);
 
     let all_routes = Router::new()
         .route("/", get(|| async { "Hello, World!" }))
-        .merge(routes::instance::routes(model_manager.clone()));
+        .merge(routes::instance::routes(instance_service));
 
     axum::serve(listener, all_routes.into_make_service())
         .await

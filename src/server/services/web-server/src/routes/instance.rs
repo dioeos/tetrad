@@ -1,10 +1,10 @@
 use axum::{Router, routing::get};
-use tetrad_core::model::ModelManager;
+use tetrad_core::model::{services::InstanceService, vendor::ModelVendor};
 use tetrad_web::handlers::instance;
 
 
-pub fn routes(mm: ModelManager) -> Router {
+pub fn routes(instance_service: InstanceService<ModelVendor>) -> Router {
     Router::new()
         .route("/instance", get(instance::api_get_handler))
-        .with_state(mm)
+        .with_state(instance_service)
 }
