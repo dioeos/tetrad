@@ -159,3 +159,128 @@ impl InstanceBmc {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    async fn read_instances(mm: &ModelManager) -> Vec<InstanceRow> {
+        sqlx::query_as::<_, InstanceRow>(
+            "SELECT id, uuid, name, setup_completed_at_ms,
+                    created_at_ms, updated_at_ms
+             FROM instances",
+        )
+        .fetch_all(mm.dbx().db())
+        .await
+        .expect("read instances")
+    }
+
+    async fn create_mm() -> ModelManager {
+        ModelManager::new("sqlite::memory:")
+            .await
+            .expect("create model manager")
+    }
+
+    #[tokio::test]
+    async fn ensure_exists_creates_instance_when_missing() {
+        let mm = create_mm().await;
+
+        let before = Timestamp::now().as_milliseconds();
+
+        let id = InstanceBmc::ensure_exists(
+            &mm,
+            InstanceForCreate {
+                name: "test-instance".to_owned(),
+            },
+        )
+        .await
+        .expect("create instance");
+
+        let after = Timestamp::now().as_milliseconds();
+        let rows = read_instances(&mm).await;
+        assert_eq!(rows.len(), 1);
+        let row = &rows[0];
+        assert_eq!(id, 1);
+        assert_eq!(row.id, id);
+        assert_eq!(row.name, "test-instance");
+        assert!(row.setup_completed_at_ms.is_none());
+        let uuid = Uuid::parse_str(&row.uuid).expect("valid UUID");
+        assert_eq!(uuid.get_version_num(), 7);
+        assert!((before..=after).contains(&row.created_at_ms));
+        assert_eq!(row.updated_at_ms, row.created_at_ms);
+        mm.dbx().db().close().await;
+    }
+
+    #[tokio::test]
+    async fn ensure_exists_preserves_existing_instance() {
+        let mm = create_mm().await;
+
+        let first_id = InstanceBmc::ensure_exists(
+            &mm,
+            InstanceForCreate {
+                name: "original-instance".to_owned(),
+            },
+        )
+        .await
+        .expect("create first instance");
+
+        sqlx::query(
+            "UPDATE instances
+            SET setup_completed_at_ms = 3000,
+                created_at_ms = 1000, updated_at_ms = 2000
+            WHERE id = 1",
+        )
+        .execute(mm.dbx().db())
+        .await
+        .expect("set existing instance timestamps");
+
+        let before = read_instances(&mm).await;
+        assert_eq!(before.len(), 1);
+
+        let second_id = InstanceBmc::ensure_exists(
+            &mm,
+            InstanceForCreate {
+                name: "replacement-name".to_owned(),
+            },
+        )
+        .await
+        .expect("return existing instance");
+
+        let after = read_instances(&mm).await;
+        assert_eq!(second_id, first_id);
+        assert_eq!(after.len(), 1);
+        assert_eq!(after[0].id, before[0].id);
+        assert_eq!(after[0].uuid, before[0].uuid);
+        assert_eq!(after[0].name, before[0].name);
+        assert_eq!(
+            after[0].setup_completed_at_ms,
+            before[0].setup_completed_at_ms
+        );
+        assert_eq!(after[0].created_at_ms, before[0].created_at_ms);
+        assert_eq!(after[0].updated_at_ms, before[0].updated_at_ms);
+
+        mm.dbx().db().close().await;
+    }
+
+    #[tokio::test]
+    async fn ensure_exists_reports_insert_failure() {
+        let mm = create_mm().await;
+
+        mm.dbx().db().close().await;
+
+        let result = InstanceBmc::ensure_exists(
+            &mm,
+            InstanceForCreate {
+                name: "test-instance".to_owned(),
+            },
+        )
+        .await;
+
+        assert!(matches!(
+            result,
+            Err(Error::FailedToInsertInstance(
+                super::super::store::dbx::error::Error::Sqlx(sqlx::Error::PoolClosed)
+            ))
+        ));
+    }
+}
